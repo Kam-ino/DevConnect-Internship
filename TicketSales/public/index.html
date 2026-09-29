@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket Sales · Live demo</title>
+<meta name="description" content="Live demo of a ticket API where two requests for the same seat can never both succeed.">
+<style>
+  :root {
+    --bg: #ffffff; --muted-bg: #f6f7f8; --text: #111111; --text-2: #555555; --text-3: #888888;
+    --border: #e5e5e5; --link: #0b57d0; --ok: #1a7f37; --bad: #cf222e; --warn: #9a6700;
+    --taken: #d0d4d9; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --seat: 11px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: var(--link); }
+  code { font-family: var(--mono); font-size: .9em; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+
+  header { padding: 40px 0 24px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 13px; color: var(--text-3); }
+  h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 8px; font-weight: 600; }
+  .lede { color: var(--text-2); margin: 0 0 14px; max-width: 660px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--text-2); }
+  .meta b { color: var(--text); font-weight: 500; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: inline-block; margin-right: 6px; }
+  .dot.down { background: var(--bad); }
+
+  section { padding: 32px 0 0; }
+  h2 { font-size: 20px; font-weight: 600; margin: 0; }
+  .sub { color: var(--text-2); margin: 4px 0 14px; max-width: 660px; font-size: 14px; }
+
+  .btn { font-family: inherit; font-size: 14px; font-weight: 500; line-height: 1; background: var(--text); color: #fff; border: 1px solid var(--text); padding: 9px 14px; border-radius: 6px; cursor: pointer; }
+  .btn:hover { background: #333; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+  label { font-size: 13px; color: var(--text-2); }
+  input, select { font: 14px/1.4 inherit; font-family: inherit; color: var(--text); background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 7px 9px; }
+  input[type=number] { width: 80px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 12px; }
+  .stat { font-size: 13px; color: var(--text-2); }
+  .stat b { color: var(--text); font-weight: 600; }
+  .timing { font-family: var(--mono); font-size: 12.5px; }
+  .fast { color: var(--ok); } .slow { color: var(--bad); }
+
+  .map { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .section h3 { font-size: 13px; font-weight: 600; margin: 0 0 6px; color: var(--text-2); }
+  .rows { overflow-x: auto; }
+  .row { display: flex; align-items: center; gap: 2px; margin-bottom: 2px; }
+  .row .label { width: 14px; font: 10px var(--mono); color: var(--text-3); flex: none; }
+  .seat { width: var(--seat); height: var(--seat); border-radius: 2px; border: 1px solid #b9bec5; background: #fff; padding: 0; flex: none; }
+  button.seat { cursor: pointer; }
+  button.seat:hover { border-color: var(--text); background: #eef3fd; }
+  .seat.taken { background: var(--taken); border-color: var(--taken); }
+  .seat.selected { background: var(--link); border-color: var(--link); }
+  .seat.just-sold { background: var(--ok); border-color: var(--ok); }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text-3); margin-top: 10px; align-items: center; flex-wrap: wrap; }
+  .legend .seat { display: inline-block; vertical-align: -1px; margin-right: 4px; }
+
+  .panel { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-top: 12px; }
+  .panel .line { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .muted { color: var(--text-3); font-size: 13px; }
+  .msg { font-size: 14px; margin-top: 10px; }
+  .msg.ok { color: var(--ok); } .msg.bad { color: var(--bad); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-weight: 500; color: var(--text-3); font-size: 13px; }
+  .scroll { overflow: auto; }
+  .results { max-height: 320px; margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; }
+  .results table { font: 12.5px/1.45 var(--mono); }
+  .results th { position: sticky; top: 0; background: #fff; }
+  .s201 { color: var(--ok); font-weight: 600; } .s409 { color: var(--warn); font-weight: 600; } .sother { color: var(--bad); font-weight: 600; }
+  .summary { margin-top: 12px; font-size: 14px; }
+  .summary b.ok { color: var(--ok); } .summary b.bad { color: var(--bad); }
+  .code-pill { font: 12px var(--mono); padding: 1px 5px; border-radius: 4px; background: var(--muted-bg); }
+
+  footer { margin: 40px 0 0; padding: 16px 0 32px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-3); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 760px) {
+    :root { --seat: 9px; }
+    .map { grid-template-columns: 1fr; }
+    table.ref { min-width: 560px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Brief B · Ticket sales</div>
+    <h1>Ticket Sales</h1>
+    <p class="lede">Events, seats and orders. Two requests for the same seat can never both succeed. The race test below fires simultaneous requests at the live server so you can check that for yourself.</p>
+    <div class="meta">
+      <span><span class="dot" id="healthDot"></span><span id="healthText">checking server…</span></span>
+      <span>seeded <b id="rows">…</b></span>
+      <span><a href="https://github.com/Kam-ino/DevConnect-Internship/tree/main/TicketSales" target="_blank" rel="noopener">source on GitHub ↗</a></span>
+      <span><a href="/README.md" target="_blank" rel="noopener">README</a></span>
+    </div>
+  </header>
+
+  <section aria-labelledby="free-title">
+    <h2 id="free-title">Free seats</h2>
+    <p class="sub">Loaded from <code>GET /events/:id/seats/free</code>. The timing shows the server's query time and the full round trip from your browser.</p>
+    <div class="toolbar">
+      <label for="eventSelect">Event</label>
+      <select id="eventSelect"></select>
+      <span class="stat" id="freeStat"></span>
+      <span class="timing" id="timing"></span>
+    </div>
+    <div class="map" id="map"><span class="muted">Loading seats…</span></div>
+    <div class="legend">
+      <span><span class="seat"></span>free</span>
+      <span><span class="seat taken"></span>reserved</span>
+      <span><span class="seat selected"></span>selected</span>
+      <span><span class="seat just-sold"></span>just reserved by the race test</span>
+    </div>
+
+    <div class="panel" id="reservePanel">
+      <div class="line">
+        <span id="selectedText" class="muted">Click a free seat to select it.</span>
+      </div>
+      <div class="line" style="margin-top:10px">
+        <label for="customer">Customer</label>
+        <input id="customer" value="alice" maxlength="100" autocomplete="off">
+        <button class="btn" id="reserveBtn" type="button" disabled>Reserve seat</button>
+      </div>
+      <div class="msg" id="reserveMsg"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="race-title">
+    <h2 id="race-title">Race test</h2>
+    <p class="sub">Fires several reservation requests for one seat at the same moment, each from a different customer. The server runs several worker processes, so the requests really do run in parallel. Exactly one should get <code>201</code>, and every other one should get <code>409</code>.</p>
+    <div class="toolbar">
+      <label for="raceN">Requests</label>
+      <input id="raceN" type="number" min="2" max="100" value="20">
+      <span class="muted" id="raceSeatText">Uses the selected seat, or a random free seat.</span>
+      <button class="btn" id="raceBtn" type="button">Fire simultaneous reservations</button>
+    </div>
+    <div class="summary" id="raceSummary"></div>
+    <div class="results scroll" id="raceResults" hidden>
+      <table>
+        <thead><tr><th>Customer</th><th>Status</th><th>Process</th><th>Response</th></tr></thead>
+        <tbody id="raceBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="ref-title">
+    <h2 id="ref-title">Endpoints</h2>
+    <p class="sub">Errors are always <code>{"error": "…", "field": "…"}</code>.</p>
+    <div class="scroll">
+      <table class="ref">
+        <thead><tr><th>Request</th><th>Success</th><th>Other responses</th></tr></thead>
+        <tbody>
+          <tr><td><code>GET /events</code></td><td><span class="code-pill">200</span> events with free and total seat counts</td><td></td></tr>
+          <tr><td><code>GET /events/:eventId/seats/free</code></td><td><span class="code-pill">200</span> the free seats</td><td><span class="code-pill">400</span> bad id · <span class="code-pill">404</span> no such event</td></tr>
+          <tr><td><code>POST /events/:eventId/seats/:seatId/reservations</code><br><span class="muted">body <code>{"customer": "alice"}</code></span></td><td><span class="code-pill">201</span> order created</td><td><span class="code-pill">409</span> already reserved · <span class="code-pill">404</span> seat not in event · <span class="code-pill">400</span> bad input</td></tr>
+          <tr><td><code>GET /events/:eventId/seats/:seatId</code></td><td><span class="code-pill">200</span> seat with <code>reserved</code> true/false</td><td><span class="code-pill">404</span></td></tr>
+          <tr><td><code>GET /orders/:orderId</code></td><td><span class="code-pill">200</span> the order</td><td><span class="code-pill">404</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span>Node · Express 5 · SQLite (node:sqlite) · multi-process</span>
+    <span><a href="/stats" target="_blank" rel="noopener">/stats</a> · <a href="/health" target="_blank" rel="noopener">/health</a></span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const money = (cents) => (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2 });
+  const num = (n) => n.toLocaleString('en-US');
+
+  let eventId = null;
+  let freeSeats = [];
+  let selected = null;
+  const justSold = new Set();
+
+  async function getJson(url, init) {
+    const res = await fetch(url, init);
+    const text = await res.text();
+    let body = null;
+    try { body = text ? JSON.parse(text) : null; } catch { body = text; }
+    return { res, body };
+  }
+
+  async function loadHeader() {
+    try {
+      const { res } = await getJson('/health');
+      $('healthDot').classList.toggle('down', !res.ok);
+      $('healthText').textContent = res.ok ? 'server up' : 'server unreachable';
+    } catch {
+      $('healthDot').classList.add('down');
+      $('healthText').textContent = 'server unreachable';
+    }
+    const { body } = await getJson('/stats');
+    $('rows').textContent = `${num(body.seats)} seats, ${num(body.events)} events, ${num(body.orders)} orders (${num(body.total)} rows)`;
+  }
+
+  async function loadEvents() {
+    const { body } = await getJson('/events');
+    $('eventSelect').innerHTML = body.events.map((e) => {
+      const date = new Date(e.startsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `<option value="${e.id}">${esc(e.name)} · ${date}</option>`;
+    }).join('');
+    eventId = body.events[0].id;
+    await loadSeats();
+  }
+
+  async function loadSeats() {
+    const started = performance.now();
+    const { res, body } = await getJson(`/events/${eventId}/seats/free`);
+    const roundTrip = performance.now() - started;
+    const dbMs = Number((res.headers.get('server-timing') || '').split('dur=')[1]);
+    freeSeats = body.seats;
+    const cls = (ms) => (ms < 200 ? 'fast' : 'slow');
+    $('timing').innerHTML = `server <span class="${cls(dbMs)}">${dbMs.toFixed(1)} ms</span> · round trip <span class="${cls(roundTrip)}">${roundTrip.toFixed(0)} ms</span>`;
+    renderMap();
+  }
+
+  function renderMap() {
+    const byKey = new Map(freeSeats.map((s) => [`${s.section}|${s.row}|${s.number}`, s]));
+    const sections = [...new Set(freeSeats.map((s) => s.section))].sort();
+    const rows = [...new Set(freeSeats.map((s) => s.row))].sort();
+    const maxNumber = Math.max(...freeSeats.map((s) => s.number));
+    let total = 0;
+    $('map').innerHTML = sections.map((section) => {
+      const price = freeSeats.find((s) => s.section === section).priceCents;
+      const rowHtml = rows.map((row) => {
+        let cells = '';
+        for (let n = 1; n <= maxNumber; n++) {
+          total++;
+          const seat = byKey.get(`${section}|${row}|${n}`);
+          const label = `Section ${section}, row ${row}, seat ${n}`;
+          if (seat) {
+            const sel = selected && selected.id === seat.id ? ' selected' : '';
+            cells += `<button class="seat${sel}" type="button" data-id="${seat.id}" title="${label} · ${money(seat.priceCents)}" aria-label="${label}, free"></button>`;
+          } else {
+            cells += `<span class="seat taken" title="${label} · reserved"></span>`;
+          }
+        }
+        return `<div class="row"><span class="label">${row}</span>${cells}</div>`;
+      }).join('');
+      return `<div class="section"><h3>Section ${section} · ${money(price)}</h3><div class="rows">${rowHtml}</div></div>`;
+    }).join('');
+    justSold.forEach((id) => {
+      const el = $('map').querySelector(`[data-sold="${id}"]`);
+      if (el) el.classList.add('just-sold');
+    });
+    $('freeStat').innerHTML = `<b>${num(freeSeats.length)}</b> free of ${num(total)}`;
+  }
+
+  function markSold(seat) {
+    const cell = [...$('map').querySelectorAll('.row')]
+      .filter((r) => r.querySelector('.label').textContent === seat.row && r.closest('.section').querySelector('h3').textContent.startsWith(`Section ${seat.section} `))[0];
+    if (!cell) return;
+    const el = cell.children[seat.number];
+    if (el) { el.className = 'seat just-sold'; el.removeAttribute('data-id'); }
+  }
+
+  function select(seat) {
+    selected = seat;
+    $('map').querySelectorAll('.seat.selected').forEach((el) => el.classList.remove('selected'));
+    if (seat) {
+      const el = $('map').querySelector(`[data-id="${seat.id}"]`);
+      if (el) el.classList.add('selected');
+      $('selectedText').innerHTML = `Selected <b>section ${esc(seat.section)}, row ${esc(seat.row)}, seat ${seat.number}</b> · ${money(seat.priceCents)} · seat id ${seat.id}`;
+      $('selectedText').classList.remove('muted');
+      $('raceSeatText').textContent = `Will use the selected seat (id ${seat.id}).`;
+    } else {
+      $('selectedText').textContent = 'Click a free seat to select it.';
+      $('selectedText').classList.add('muted');
+      $('raceSeatText').textContent = 'Uses the selected seat, or a random free seat.';
+    }
+    $('reserveBtn').disabled = !seat;
+  }
+
+  $('map').addEventListener('click', (e) => {
+    const btn = e.target.closest('button.seat');
+    if (!btn) return;
+    const seat = freeSeats.find((s) => s.id === Number(btn.dataset.id));
+    select(seat && (!selected || selected.id !== seat.id) ? seat : null);
+    $('reserveMsg').textContent = '';
+  });
+
+  $('eventSelect').addEventListener('change', async (e) => {
+    eventId = Number(e.target.value);
+    select(null);
+    justSold.clear();
+    $('reserveMsg').textContent = '';
+    await loadSeats();
+  });
+
+  $('reserveBtn').addEventListener('click', async () => {
+    if (!selected) return;
+    const seat = selected;
+    $('reserveBtn').disabled = true;
+    const { res, body } = await getJson(`/events/${eventId}/seats/${seat.id}/reservations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customer: $('customer').value }),
+    });
+    const msg = $('reserveMsg');
+    if (res.status === 201) {
+      msg.className = 'msg ok';
+      msg.textContent = `201 Created · order ${body.id} for ${body.customer}. Press "Reserve seat" again to see the 409.`;
+      $('reserveBtn').disabled = false;
+      await loadSeats();
+      const el = $('map').querySelector(`[data-id="${seat.id}"]`);
+      if (!el) markSold(seat);
+    } else {
+      msg.className = 'msg bad';
+      msg.textContent = `${res.status} · ${body && body.error ? body.error : 'request failed'}${body && body.field ? ` (field: ${body.field})` : ''}`;
+      $('reserveBtn').disabled = res.status !== 409;
+      if (res.status === 409) { select(null); await loadSeats(); markSold(seat); }
+    }
+  });
+
+  $('raceBtn').addEventListener('click', async () => {
+    const n = Math.min(100, Math.max(2, Number($('raceN').value) || 20));
+    let seat = selected;
+    if (!seat) {
+      if (freeSeats.length === 0) return;
+      seat = freeSeats[Math.floor(Math.random() * freeSeats.length)];
+    }
+    $('raceBtn').disabled = true;
+    $('raceSummary').textContent = `Sending ${n} requests for section ${seat.section}, row ${seat.row}, seat ${seat.number} (id ${seat.id})…`;
+    const url = `/events/${eventId}/seats/${seat.id}/reservations`;
+    const started = performance.now();
+    const results = await Promise.all(Array.from({ length: n }, (_, i) =>
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer: `buyer-${i + 1}` }) })
+        .then(async (res) => ({ i: i + 1, status: res.status, pid: res.headers.get('x-served-by'), body: await res.json().catch(() => null) }))
+        .catch((err) => ({ i: i + 1, status: 0, pid: '-', body: { error: String(err) } }))));
+    const elapsed = performance.now() - started;
+
+    $('raceBody').innerHTML = results.map((r) => {
+      const cls = r.status === 201 ? 's201' : r.status === 409 ? 's409' : 'sother';
+      const detail = r.status === 201 ? `order ${r.body.id}` : (r.body && r.body.error) || '';
+      return `<tr><td>buyer-${r.i}</td><td class="${cls}">${r.status}</td><td>${esc(r.pid || '-')}</td><td>${esc(detail)}</td></tr>`;
+    }).join('');
+    $('raceResults').hidden = false;
+
+    const wins = results.filter((r) => r.status === 201).length;
+    const conflicts = results.filter((r) => r.status === 409).length;
+    const pids = new Set(results.map((r) => r.pid).filter(Boolean));
+    const { body: after } = await getJson(`/events/${eventId}/seats/${seat.id}`);
+    const pass = wins <= 1 && wins + conflicts === n && after.reserved;
+    const note = wins === 0 ? ' (the seat was already taken before this test)' : '';
+    $('raceSummary').innerHTML =
+      `<b class="${pass ? 'ok' : 'bad'}">${pass ? 'Pass' : 'Fail'}</b>: ${wins} × 201 Created, ${conflicts} × 409 Conflict${note}. ` +
+      `${n} requests in ${elapsed.toFixed(0)} ms, handled by ${pids.size} server process${pids.size === 1 ? '' : 'es'}. Seat reserved afterwards: ${after.reserved}.`;
+
+    select(null);
+    await loadSeats();
+    markSold(seat);
+    $('raceBtn').disabled = false;
+  });
+
+  loadHeader();
+  loadEvents();
+})();
+</script>
+</body>
+</html>

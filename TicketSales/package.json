@@ -1,0 +1,19 @@
+{
+  "name": "ticket-sales",
+  "version": "1.0.0",
+  "description": "Events, seats and orders API where two requests for the same seat can never both succeed.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.13 <25"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test --test-concurrency=1 test/*.test.js",
+    "race": "node scripts/race.js",
+    "bench": "node scripts/bench.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

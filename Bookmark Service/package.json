@@ -1,0 +1,17 @@
+{
+  "name": "bookmark-service",
+  "version": "1.0.0",
+  "description": "HTTP service for saving bookmarks, with strict input validation and duplicate detection.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

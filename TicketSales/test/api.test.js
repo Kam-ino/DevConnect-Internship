@@ -7,7 +7,7 @@ before(async () => { api = await startInProcess(); });
 after(() => api.close());
 
 const firstFreeSeat = async (eventId = 1) => (await api.request('GET', `/events/${eventId}/seats/free`)).body.seats[0];
-const reserve = (eventId, seatId, json = { customer: 'alice' }) =>
+const reserve = (eventId, seatId, json = { customer: 'Kamino' }) =>
   api.request('POST', `/events/${eventId}/seats/${seatId}/reservations`, { json });
 
 describe('listing free seats', () => {
@@ -51,7 +51,7 @@ describe('listing free seats', () => {
 describe('reserving a seat', () => {
   it('201 the first time, 409 the second time, and the seat leaves the free list', async () => {
     const seat = await firstFreeSeat(1);
-    const first = await reserve(1, seat.id, { customer: 'alice' });
+    const first = await reserve(1, seat.id, { customer: 'Kamino' });
     assert.equal(first.status, 201);
     assert.equal(first.headers.get('location'), `/orders/${first.body.id}`);
     assert.equal(first.body.seatId, seat.id);
@@ -68,7 +68,7 @@ describe('reserving a seat', () => {
 
     const order = await api.request('GET', `/orders/${first.body.id}`);
     assert.equal(order.status, 200);
-    assert.equal(order.body.customer, 'alice');
+    assert.equal(order.body.customer, 'Kamino');
   });
 
   it('two requests fired together in one process: exactly one wins', async () => {

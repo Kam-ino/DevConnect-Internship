@@ -123,7 +123,7 @@
       </div>
       <div class="line" style="margin-top:10px">
         <label for="customer">Customer</label>
-        <input id="customer" value="alice" maxlength="100" autocomplete="off">
+        <input id="customer" value="Kamino" maxlength="100" autocomplete="off">
         <button class="btn" id="reserveBtn" type="button" disabled>Reserve seat</button>
       </div>
       <div class="msg" id="reserveMsg"></div>
@@ -157,7 +157,7 @@
         <tbody>
           <tr><td><code>GET /events</code></td><td><span class="code-pill">200</span> events with free and total seat counts</td><td></td></tr>
           <tr><td><code>GET /events/:eventId/seats/free</code></td><td><span class="code-pill">200</span> the free seats</td><td><span class="code-pill">400</span> bad id · <span class="code-pill">404</span> no such event</td></tr>
-          <tr><td><code>POST /events/:eventId/seats/:seatId/reservations</code><br><span class="muted">body <code>{"customer": "alice"}</code></span></td><td><span class="code-pill">201</span> order created</td><td><span class="code-pill">409</span> already reserved · <span class="code-pill">404</span> seat not in event · <span class="code-pill">400</span> bad input</td></tr>
+          <tr><td><code>POST /events/:eventId/seats/:seatId/reservations</code><br><span class="muted">body <code>{"customer": "Kamino"}</code></span></td><td><span class="code-pill">201</span> order created</td><td><span class="code-pill">409</span> already reserved · <span class="code-pill">404</span> seat not in event · <span class="code-pill">400</span> bad input</td></tr>
           <tr><td><code>GET /events/:eventId/seats/:seatId</code></td><td><span class="code-pill">200</span> seat with <code>reserved</code> true/false</td><td><span class="code-pill">404</span></td></tr>
           <tr><td><code>GET /orders/:orderId</code></td><td><span class="code-pill">200</span> the order</td><td><span class="code-pill">404</span></td></tr>
         </tbody>

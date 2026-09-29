@@ -7,7 +7,7 @@ export async function startServer() {
   await new Promise((resolve) => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
 
-  async function request(method, path, { json, raw, contentType, user = 'alice' } = {}) {
+  async function request(method, path, { json, raw, contentType, user = 'Kamino' } = {}) {
     const headers = {};
     if (user !== null) headers['X-User-Id'] = user;
     let body;

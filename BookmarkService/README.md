@@ -112,7 +112,7 @@ Why not hash the whole request body? Then changing the title would create a seco
 
 ### 2. Scoped per user
 
-Uniqueness is on `(user_id, normalized_url)`. Alice and Bob can both bookmark the same page. Each of them can only have it once.
+Uniqueness is on `(user_id, normalized_url)`. Kamino and Bob can both bookmark the same page. Each of them can only have it once.
 
 ### 3. Enforced by the database, not by an `if`
 
@@ -188,17 +188,17 @@ test/
 
 ```bash
 # create -> 201
-curl -i -X POST localhost:3000/bookmarks -H "X-User-Id: alice" -H "Content-Type: application/json" -d '{"url":"https://example.com","title":"Example"}'
+curl -i -X POST localhost:3000/bookmarks -H "X-User-Id: Kamino" -H "Content-Type: application/json" -d '{"url":"https://example.com","title":"Example"}'
 
 # same again, different spelling -> 200, same id
-curl -i -X POST localhost:3000/bookmarks -H "X-User-Id: alice" -H "Content-Type: application/json" -d '{"url":"HTTPS://EXAMPLE.COM:443/"}'
+curl -i -X POST localhost:3000/bookmarks -H "X-User-Id: Kamino" -H "Content-Type: application/json" -d '{"url":"HTTPS://EXAMPLE.COM:443/"}'
 
 # bad input -> 400 naming the field
-curl -i -X POST localhost:3000/bookmarks -H "X-User-Id: alice" -H "Content-Type: application/json" -d '{"url":12345}'
+curl -i -X POST localhost:3000/bookmarks -H "X-User-Id: Kamino" -H "Content-Type: application/json" -d '{"url":12345}'
 
-curl -i localhost:3000/bookmarks -H "X-User-Id: alice"
-curl -i localhost:3000/bookmarks/1 -H "X-User-Id: alice"
-curl -i -X DELETE localhost:3000/bookmarks/1 -H "X-User-Id: alice"
+curl -i localhost:3000/bookmarks -H "X-User-Id: Kamino"
+curl -i localhost:3000/bookmarks/1 -H "X-User-Id: Kamino"
+curl -i -X DELETE localhost:3000/bookmarks/1 -H "X-User-Id: Kamino"
 ```
 
 On Windows PowerShell, use `curl.exe` instead of `curl`, and escape the inner double quotes in the JSON as `\"`.

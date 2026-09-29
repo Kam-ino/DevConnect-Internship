@@ -57,7 +57,7 @@ Seeding runs in one transaction and is skipped if events already exist. You can 
 |---|---|---|---|
 | `GET` | `/events` | **200** events with `totalSeats` and `freeSeats` | |
 | `GET` | `/events/:eventId/seats/free` | **200** `{ eventId, freeCount, seats: [...] }` | `400` bad id · `404` no such event |
-| `POST` | `/events/:eventId/seats/:seatId/reservations` with body `{"customer": "alice"}` | **201** the new order, with a `Location` header | **`409` seat already reserved** · `404` seat not in this event · `400` bad input · `503` database busy (retry) |
+| `POST` | `/events/:eventId/seats/:seatId/reservations` with body `{"customer": "Kamino"}` | **201** the new order, with a `Location` header | **`409` seat already reserved** · `404` seat not in this event · `400` bad input · `503` database busy (retry) |
 | `GET` | `/events/:eventId/seats/:seatId` | **200** the seat, with `"reserved": true/false` | `404` |
 | `GET` | `/orders/:orderId` | **200** the order | `404` |
 
@@ -86,7 +86,7 @@ Run against a local server started with `npm start` (4 worker processes). Seat 1
 ```bash
 curl -s -w '  -> HTTP %{http_code}, served by pid %header{x-served-by}\n' \
   -X POST localhost:3000/events/1/seats/100/reservations \
-  -H 'Content-Type: application/json' -d '{"customer":"alice"}' &
+  -H 'Content-Type: application/json' -d '{"customer":"Kamino"}' &
 curl -s -w '  -> HTTP %{http_code}, served by pid %header{x-served-by}\n' \
   -X POST localhost:3000/events/1/seats/100/reservations \
   -H 'Content-Type: application/json' -d '{"customer":"bob"}' &
@@ -96,11 +96,11 @@ wait
 **What came back:**
 
 ```
-{"id":1715,"eventId":1,"seatId":100,"customer":"bob","createdAt":"2026-09-29T11:32:42.449Z"}  -> HTTP 201, served by pid 408
-{"error":"seat is already reserved","field":"seatId"}  -> HTTP 409, served by pid 414
+{"id":1715,"eventId":1,"seatId":100,"customer":"bob","createdAt":"2026-09-29T11:45:22.249Z"}  -> HTTP 201, served by pid 438
+{"error":"seat is already reserved","field":"seatId"}  -> HTTP 409, served by pid 439
 ```
 
-The two requests were handled by **two different processes** (408 and 414). One got `201`, the other got `409`.
+The two requests were handled by **two different processes** (438 and 439). One got `201`, the other got `409`.
 
 **Checking the result:**
 
@@ -109,7 +109,7 @@ $ curl -s localhost:3000/events/1/seats/100
 {"id":100,"section":"A","row":"D","number":10,"priceCents":450000,"eventId":1,"reserved":true}
 
 $ curl -s localhost:3000/orders/1715
-{"id":1715,"eventId":1,"seatId":100,"customer":"bob","createdAt":"2026-09-29T11:32:42.449Z"}
+{"id":1715,"eventId":1,"seatId":100,"customer":"bob","createdAt":"2026-09-29T11:45:22.249Z"}
 ```
 
 Counting rows in the database directly: seat 100 has exactly **1** order.

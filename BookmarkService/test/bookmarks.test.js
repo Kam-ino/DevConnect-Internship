@@ -202,15 +202,15 @@ describe('repeats', () => {
   });
 
   it('two users saving the same URL get their own rows', async () => {
-    await create({ url: 'https://example.com' }, { user: 'alice' });
+    await create({ url: 'https://example.com' }, { user: 'Kamino' });
     await create({ url: 'https://example.com' }, { user: 'bob' });
     assert.equal(api.rowCount(), 2);
   });
 });
 
 describe('isolation between users', () => {
-  it('bob cannot list, fetch or delete alice\'s bookmark', async () => {
-    const { body } = await create({ url: 'https://example.com' }, { user: 'alice' });
+  it('bob cannot list, fetch or delete Kamino\'s bookmark', async () => {
+    const { body } = await create({ url: 'https://example.com' }, { user: 'Kamino' });
     const bob = { user: 'bob' };
     assert.equal((await api.request('GET', '/bookmarks', bob)).body.bookmarks.length, 0);
     assert.equal((await api.request('GET', `/bookmarks/${body.id}`, bob)).status, 404);

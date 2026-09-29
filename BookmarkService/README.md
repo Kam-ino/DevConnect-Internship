@@ -4,7 +4,7 @@ A small HTTP service for saving bookmarks. A caller can create a bookmark, list 
 
 The point of the exercise is the unhappy path: every malformed input comes back as a `400` that names the offending field, nothing malformed is ever saved, no input can produce a `500`, and sending the same create request twice leaves exactly one row.
 
-**Live demo:** https://YOUR-SERVICE.onrender.com. The page runs every acceptance check against the live server. Press **Run all checks**.
+**Live demo:** https://devconnect-internship-bookmark-service.onrender.com. The page runs every acceptance check against the live server. Press **Run all checks**.
 
 **Stack:** Node.js 22.13+ · Express 5 · SQLite via the built-in `node:sqlite` module (no native dependencies) · tests with the built-in `node:test` runner.
 

@@ -4,7 +4,7 @@ An HTTP service for selling seats to events. You can list the free seats for an 
 
 The point of the exercise: **two requests for the same seat can never both succeed**. This README shows that with real commands and their real output, not just a claim.
 
-**Live demo:** https://YOUR-SERVICE.onrender.com. Pick a seat, or press **Fire simultaneous reservations** to race 20 buyers for one seat.
+**Live demo:** https://devconnect-internship-ticket-sales.onrender.com. Pick a seat, or press **Fire simultaneous reservations** to race 20 buyers for one seat.
 
 **Stack:** Node.js 22.13+ · Express 5 · SQLite via the built-in `node:sqlite` module · the server runs as several worker processes (`node:cluster`) sharing one database file.
 

@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spending Wrapped · Live demo</title>
+<meta name="description" content="Upload a spending CSV and get a year-in-review. The import runs in a background worker you can crash on purpose.">
+<style>
+  :root {
+    --bg: #ffffff; --muted-bg: #f6f7f8; --text: #111111; --text-2: #555555; --text-3: #888888;
+    --border: #e5e5e5; --link: #0b57d0; --ok: #1a7f37; --bad: #cf222e; --warn: #9a6700; --bar: #111111;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: var(--link); }
+  code { font-family: var(--mono); font-size: .9em; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  [hidden] { display: none !important; }
+
+  header { padding: 40px 0 24px; border-bottom: 1px solid var(--border); }
+  .eyebrow { font-size: 13px; color: var(--text-3); }
+  h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 8px; font-weight: 600; }
+  .lede { color: var(--text-2); margin: 0 0 14px; max-width: 680px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--text-2); }
+  .meta b { color: var(--text); font-weight: 500; font-family: var(--mono); font-size: 12.5px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); display: inline-block; margin-right: 6px; }
+  .dot.down { background: var(--bad); }
+
+  section { padding: 32px 0 0; }
+  h2 { font-size: 20px; font-weight: 600; margin: 0; }
+  h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
+  .sub { color: var(--text-2); margin: 4px 0 14px; max-width: 680px; font-size: 14px; }
+  .muted { color: var(--text-3); font-size: 13px; }
+
+  .btn { font-family: inherit; font-size: 14px; font-weight: 500; line-height: 1; background: var(--text); color: #fff; border: 1px solid var(--text); padding: 9px 14px; border-radius: 6px; cursor: pointer; }
+  .btn:hover { background: #333; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.ghost { background: #fff; color: var(--text); border-color: var(--border); }
+  .btn.ghost:hover { background: var(--muted-bg); }
+  .btn.danger { background: #fff; color: var(--bad); border-color: #f1b5b9; }
+  .btn.danger:hover:not(:disabled) { background: #fdecee; }
+  :focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+  label { font-size: 13px; color: var(--text-2); display: block; margin-bottom: 4px; }
+  input { font-family: inherit; font-size: 14px; color: var(--text); background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; width: 100%; }
+  input[type=file] { padding: 6px; }
+
+  .panel { border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+  .row > .field { flex: 1 1 200px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .msg { font-size: 14px; margin-top: 10px; }
+  .msg.ok { color: var(--ok); } .msg.bad { color: var(--bad); }
+  pre.response { background: var(--muted-bg); border-radius: 6px; padding: 10px 12px; font: 12.5px/1.5 var(--mono); white-space: pre-wrap; word-break: break-word; margin: 10px 0 0; }
+
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+  .status { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--muted-bg); color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+  .status.running { background: #fff5d6; color: var(--warn); }
+  .status.done { background: #e8f5ec; color: var(--ok); }
+  .status.failed { background: #fdecee; color: var(--bad); }
+  .progress { height: 8px; background: var(--muted-bg); border-radius: 999px; overflow: hidden; margin: 12px 0 8px; }
+  .progress > div { height: 100%; width: 0; background: var(--bar); transition: width .25s ease; }
+  .counts { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; color: var(--text-2); }
+  .counts b { color: var(--text); font-weight: 600; }
+  .timeline { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+  .timeline li { display: grid; grid-template-columns: 92px 118px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .timeline li:last-child { border-bottom: 0; }
+  .timeline time, .timeline .kind { font-family: var(--mono); font-size: 12px; color: var(--text-3); }
+  .timeline .kind.worker_died, .timeline .kind.crash_requested, .timeline .kind.failed, .timeline .kind.error { color: var(--bad); }
+  .timeline .kind.resumed, .timeline .kind.reclaimed { color: var(--warn); }
+  .timeline .kind.completed { color: var(--ok); }
+  details summary { cursor: pointer; font-size: 13px; color: var(--text-2); }
+  .errors { font: 12.5px/1.5 var(--mono); margin: 6px 0 0; padding-left: 18px; }
+
+  .wrapped { border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .big { font-size: 40px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin: 4px 0 2px; }
+  .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+  .fact { background: var(--muted-bg); border-radius: 8px; padding: 12px; }
+  .fact .label { font-size: 12px; color: var(--text-3); }
+  .fact .value { font-size: 17px; font-weight: 600; margin-top: 2px; }
+  .fact .note { font-size: 12.5px; color: var(--text-2); }
+  .bars { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+  .bars li { margin-bottom: 8px; }
+  .bars .top { display: flex; justify-content: space-between; gap: 10px; }
+  .bars .track { height: 6px; background: var(--muted-bg); border-radius: 999px; margin-top: 3px; overflow: hidden; }
+  .bars .track > div { height: 100%; background: var(--bar); }
+  .fingerprint { font: 12.5px var(--mono); color: var(--text-2); margin-top: 14px; word-break: break-all; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-weight: 500; color: var(--text-3); font-size: 13px; }
+  .scroll { overflow-x: auto; }
+  .code-pill { font: 12px var(--mono); padding: 1px 5px; border-radius: 4px; background: var(--muted-bg); }
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover td { background: var(--muted-bg); }
+
+  footer { margin: 40px 0 0; padding: 16px 0 32px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-3); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+  @media (max-width: 760px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .timeline li { grid-template-columns: 80px 1fr; }
+    .timeline .detail { grid-column: 1 / -1; }
+    table.ref { min-width: 560px; }
+    .big { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Final project · A service with a job running behind it</div>
+    <h1>Spending Wrapped</h1>
+    <p class="lede">Upload a year of spending as a CSV and get a year-in-review. The upload returns straight away, and a separate worker process does the import in the background. You can kill that worker in the middle of a job and watch it recover with exactly the same result.</p>
+    <div class="meta">
+      <span><span class="dot" id="healthDot"></span><span id="healthText">checking server…</span></span>
+      <span>worker <b id="workerText">…</b></span>
+      <span><a href="https://github.com/Kam-ino/DevConnect-Internship/tree/main/SpendingWrapped" target="_blank" rel="noopener">source on GitHub ↗</a></span>
+      <span><a href="/README.md" target="_blank" rel="noopener">README</a></span>
+    </div>
+  </header>
+
+  <section aria-labelledby="account-title">
+    <h2 id="account-title">1. Account</h2>
+    <p class="sub">Every data route needs a Bearer token. Without one you get <code>401</code>, and you only ever see your own imports.</p>
+    <div class="panel" id="loggedOut">
+      <div class="row">
+        <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" placeholder="you@example.com"></div>
+        <div class="field"><label for="password">Password (8+ characters)</label><input id="password" type="password" autocomplete="current-password"></div>
+      </div>
+      <div class="actions" style="margin-top:12px">
+        <button class="btn" id="signupBtn" type="button">Sign up</button>
+        <button class="btn ghost" id="loginBtn" type="button">Log in</button>
+        <button class="btn ghost" id="demoBtn" type="button">Create a throwaway demo account</button>
+      </div>
+      <div class="msg" id="authMsg"></div>
+    </div>
+    <div class="panel" id="loggedIn" hidden>
+      <div class="actions">
+        <span>Logged in as <b id="whoami"></b></span>
+        <button class="btn ghost" id="logoutBtn" type="button">Log out</button>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:12px">
+      <button class="btn ghost" id="noTokenBtn" type="button">Try <code>GET /imports</code> without a token</button>
+    </div>
+    <pre class="response" id="noTokenOut" hidden></pre>
+  </section>
+
+  <section aria-labelledby="upload-title" id="uploadSection" hidden>
+    <h2 id="upload-title">2. Upload</h2>
+    <p class="sub">Columns: <code>date, merchant, amount</code> (optional <code>category</code>). Each upload gets an <code>Idempotency-Key</code>, so sending it twice creates one import.</p>
+    <div class="panel">
+      <div class="actions">
+        <button class="btn" id="sampleBtn" type="button">Import the sample CSV (1,191 rows)</button>
+        <span class="muted">or</span>
+        <input id="fileInput" type="file" accept=".csv,text/csv" style="max-width:280px">
+        <a href="/sample.csv" class="muted">download the sample</a>
+      </div>
+      <div class="msg" id="uploadMsg"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="job-title" id="jobSection" hidden>
+    <h2 id="job-title">3. Background import</h2>
+    <p class="sub">The worker saves a checkpoint after every 50 rows. Press <b>Crash the worker</b> while it runs: the process gets <code>SIGKILL</code>, the supervisor records it and starts a new worker, and the job picks up from the last checkpoint.</p>
+    <div class="panel">
+      <div class="actions" style="justify-content:space-between">
+        <div><span class="status" id="jobStatus">queued</span> <b id="jobTitle"></b></div>
+        <div class="actions">
+          <button class="btn danger" id="crashBtn" type="button" disabled>Crash the worker now</button>
+          <button class="btn ghost" id="rerunBtn" type="button" disabled>Run again</button>
+        </div>
+      </div>
+      <div class="progress"><div id="jobBar"></div></div>
+      <div class="counts" id="jobCounts"></div>
+      <div class="msg" id="jobMsg"></div>
+      <h3 style="margin-top:16px">What happened</h3>
+      <ul class="timeline" id="timeline"></ul>
+      <details id="errorsBox" hidden style="margin-top:10px">
+        <summary id="errorsSummary"></summary>
+        <ul class="errors" id="errorsList"></ul>
+      </details>
+    </div>
+  </section>
+
+  <section aria-labelledby="wrapped-title" id="wrappedSection" hidden>
+    <h2 id="wrapped-title">4. Your Wrapped</h2>
+    <p class="sub">Built by the worker at the end of each run. The fingerprint is a SHA-256 of the whole summary: after a crash, a re-run or a duplicate upload, it stays the same.</p>
+    <div class="wrapped" id="wrapped"></div>
+  </section>
+
+  <section aria-labelledby="history-title" id="historySection" hidden>
+    <h2 id="history-title">Your imports</h2>
+    <p class="sub">Click a row to follow that import.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>#</th><th>File</th><th>Status</th><th>Rows</th><th>New / dup / invalid</th><th>Runs</th><th>Fingerprint</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="ref-title">
+    <h2 id="ref-title">Endpoints</h2>
+    <p class="sub">Every error is <code>{"error": {"code", "message", …}}</code>. The <code>code</code> is stable for programs to check, and the <code>message</code> tells a person what to do next.</p>
+    <div class="scroll">
+      <table class="ref">
+        <thead><tr><th>Request</th><th>Success</th><th>Errors a caller can act on</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST /auth/signup</code>, <code>POST /auth/login</code></td><td><span class="code-pill">201</span>/<span class="code-pill">200</span> token</td><td><span class="code-pill">400</span> validation_failed · <span class="code-pill">409</span> email_taken · <span class="code-pill">401</span> invalid_credentials · <span class="code-pill">429</span> rate_limited</td></tr>
+          <tr><td><code>POST /imports</code> (text/csv, optional <code>Idempotency-Key</code>)</td><td><span class="code-pill">202</span> queued, returns at once</td><td><span class="code-pill">400</span> csv_missing_columns · <span class="code-pill">413</span> too_many_rows · <span class="code-pill">415</span> · <span class="code-pill">422</span> idempotency_key_reused</td></tr>
+          <tr><td><code>GET /imports</code>, <code>GET /imports/:id</code></td><td><span class="code-pill">200</span> progress, counts, event log</td><td><span class="code-pill">401</span> · <span class="code-pill">404</span> not yours / not found</td></tr>
+          <tr><td><code>POST /imports/:id/rerun</code></td><td><span class="code-pill">202</span> queued again</td><td><span class="code-pill">409</span> import_in_progress</td></tr>
+          <tr><td><code>POST /imports/:id/crash-worker</code></td><td><span class="code-pill">202</span> worker killed</td><td><span class="code-pill">409</span> import_not_running</td></tr>
+          <tr><td><code>GET /wrapped</code>, <code>GET /wrapped/:year</code></td><td><span class="code-pill">200</span> summaries</td><td><span class="code-pill">404</span> no_data_for_year (lists the available years)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span>Node · Express 5 · SQLite · web process + supervised worker process</span>
+    <span><a href="/health" target="_blank" rel="noopener">/health</a></span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const peso = (cents) => '₱' + (cents / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const num = (n) => Number(n).toLocaleString('en-US');
+  const monthName = (ym) => new Date(`${ym}-01T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const dayName = (d) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+
+  let token = null;
+  let email = null;
+  let currentId = null;
+  let pollTimer = null;
+  try { token = localStorage.getItem('sw-token'); email = localStorage.getItem('sw-email'); } catch {}
+
+  async function api(method, path, { body, headers = {}, auth = true } = {}) {
+    const h = { ...headers };
+    if (auth && token) h.Authorization = `Bearer ${token}`;
+    const started = performance.now();
+    const res = await fetch(path, { method, headers: h, body });
+    const text = await res.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+    return { status: res.status, data, headers: res.headers, ms: performance.now() - started };
+  }
+  const errText = (r) => (r.data && r.data.error ? `${r.status} ${r.data.error.code}: ${r.data.error.message}` : `HTTP ${r.status}`);
+
+  async function health() {
+    try {
+      const r = await api('GET', '/health', { auth: false });
+      $('healthDot').classList.toggle('down', r.status !== 200);
+      $('healthText').textContent = r.status === 200 ? 'server up' : 'server unreachable';
+      const w = r.data && r.data.worker;
+      $('workerText').textContent = w ? `${w.id} · pid ${w.pid}${w.alive ? '' : ' (restarting)'}` : 'none';
+    } catch {
+      $('healthDot').classList.add('down');
+      $('healthText').textContent = 'server unreachable';
+    }
+  }
+
+  function setSession(t, e) {
+    token = t;
+    email = e;
+    try {
+      if (t) { localStorage.setItem('sw-token', t); localStorage.setItem('sw-email', e); }
+      else { localStorage.removeItem('sw-token'); localStorage.removeItem('sw-email'); }
+    } catch {}
+    renderSession();
+  }
+
+  function renderSession() {
+    const inside = Boolean(token);
+    $('loggedOut').hidden = inside;
+    $('loggedIn').hidden = !inside;
+    $('uploadSection').hidden = !inside;
+    $('whoami').textContent = email || '';
+    if (!inside) {
+      ['jobSection', 'wrappedSection', 'historySection'].forEach((id) => { $(id).hidden = true; });
+      currentId = null;
+      clearTimeout(pollTimer);
+    }
+  }
+
+  async function authenticate(kind, creds) {
+    const r = await api('POST', `/auth/${kind}`, { auth: false, body: JSON.stringify(creds), headers: { 'Content-Type': 'application/json' } });
+    const msg = $('authMsg');
+    if (r.status === 200 || r.status === 201) {
+      msg.textContent = '';
+      setSession(r.data.token, r.data.user.email);
+      await refreshAll();
+    } else {
+      msg.className = 'msg bad';
+      msg.textContent = errText(r);
+    }
+  }
+
+  $('signupBtn').addEventListener('click', () => authenticate('signup', { email: $('email').value, password: $('password').value }));
+  $('loginBtn').addEventListener('click', () => authenticate('login', { email: $('email').value, password: $('password').value }));
+  $('demoBtn').addEventListener('click', () => {
+    const id = Math.random().toString(36).slice(2, 8);
+    const pw = crypto.getRandomValues(new Uint32Array(3)).join('-');
+    authenticate('signup', { email: `demo-${id}@example.com`, password: pw });
+  });
+  $('logoutBtn').addEventListener('click', async () => {
+    await api('POST', '/auth/logout');
+    setSession(null, null);
+  });
+  $('noTokenBtn').addEventListener('click', async () => {
+    const r = await api('GET', '/imports', { auth: false });
+    const out = $('noTokenOut');
+    out.hidden = false;
+    out.textContent = `HTTP ${r.status}\nWWW-Authenticate: ${r.headers.get('www-authenticate')}\n\n${JSON.stringify(r.data, null, 2)}`;
+  });
+
+  async function upload(csv, filename) {
+    const key = `${filename}-${crypto.getRandomValues(new Uint32Array(2)).join('')}`;
+    const r = await api('POST', `/imports?filename=${encodeURIComponent(filename)}`, { body: csv, headers: { 'Content-Type': 'text/csv', 'Idempotency-Key': key } });
+    const msg = $('uploadMsg');
+    if (r.status === 202) {
+      msg.className = 'msg ok';
+      msg.textContent = `202 Accepted in ${r.ms.toFixed(0)} ms: import #${r.data.id} is queued (${num(r.data.totalRows)} rows). The work continues in the background below.`;
+      currentId = r.data.id;
+      await refreshAll();
+    } else if (r.status === 401) {
+      setSession(null, null);
+    } else {
+      msg.className = 'msg bad';
+      msg.textContent = errText(r);
+    }
+  }
+
+  $('sampleBtn').addEventListener('click', async () => {
+    $('sampleBtn').disabled = true;
+    try {
+      const csv = await (await fetch('/sample.csv')).text();
+      await upload(csv, 'sample-spending-2025.csv');
+    } finally {
+      $('sampleBtn').disabled = false;
+    }
+  });
+  $('fileInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    await upload(await file.text(), file.name);
+    e.target.value = '';
+  });
+
+  function renderJob(job) {
+    $('jobSection').hidden = false;
+    $('jobStatus').className = `status ${job.status}`;
+    $('jobStatus').textContent = job.status;
+    $('jobTitle').textContent = `#${job.id} · ${job.filename}`;
+    const pct = job.totalRows ? Math.round((job.processedRows / job.totalRows) * 100) : 0;
+    $('jobBar').style.width = `${pct}%`;
+    $('jobCounts').innerHTML = [
+      `<span><b>${num(job.processedRows)}</b> / ${num(job.totalRows)} rows (${pct}%)</span>`,
+      `<span><b>${num(job.newRows)}</b> new</span>`,
+      `<span><b>${num(job.duplicateRows)}</b> already imported</span>`,
+      `<span><b>${num(job.invalidRows)}</b> invalid</span>`,
+      `<span>attempt <b>${job.attempts}</b></span>`,
+      `<span>run <b>${job.runCount}</b></span>`,
+    ].join('');
+    $('crashBtn').disabled = job.status !== 'running';
+    $('rerunBtn').disabled = !(job.status === 'done' || job.status === 'failed');
+    $('timeline').innerHTML = (job.events || []).map((e) =>
+      `<li><time>${esc(e.at.slice(11, 19))}</time><span class="kind ${esc(e.kind)}">${esc(e.kind)}</span><span class="detail">${esc(e.detail)}</span></li>`).join('');
+    const errors = job.rowErrors || [];
+    $('errorsBox').hidden = errors.length === 0;
+    $('errorsSummary').textContent = `${job.invalidRows} row${job.invalidRows === 1 ? '' : 's'} skipped, see why`;
+    $('errorsList').innerHTML = errors.map((e) => `<li>row ${e.row}: ${esc(e.error)}</li>`).join('');
+  }
+
+  function bars(items, labelOf, valueOf, noteOf) {
+    const max = Math.max(...items.map(valueOf));
+    return `<ul class="bars">${items.map((it) => `<li><div class="top"><span>${esc(labelOf(it))}</span><span class="muted">${esc(noteOf(it))}</span></div><div class="track"><div style="width:${(valueOf(it) / max) * 100}%"></div></div></li>`).join('')}</ul>`;
+  }
+
+  function renderWrapped(data) {
+    if (!data || !data.summaries.length) { $('wrappedSection').hidden = true; return; }
+    const s = data.summaries[0];
+    $('wrappedSection').hidden = false;
+    $('wrapped').innerHTML = `
+      <div class="muted">${s.year} in spending</div>
+      <div class="big">${peso(s.totalCents)}</div>
+      <div class="muted">${num(s.transactions)} transactions on ${num(s.daysWithSpending)} days · about ${peso(s.averagePerDayCents)} a day</div>
+      <div class="facts">
+        <div class="fact"><div class="label">Biggest month</div><div class="value">${esc(monthName(s.biggestMonth.month))}</div><div class="note">${peso(s.biggestMonth.totalCents)}</div></div>
+        <div class="fact"><div class="label">Most visited</div><div class="value">${esc(s.mostVisited.merchant)}</div><div class="note">${num(s.mostVisited.visits)} times</div></div>
+        <div class="fact"><div class="label">Biggest purchase</div><div class="value">${peso(s.biggestPurchase.amountCents)}</div><div class="note">${esc(s.biggestPurchase.merchant)}, ${esc(dayName(s.biggestPurchase.date))}</div></div>
+        <div class="fact"><div class="label">Top category</div><div class="value">${esc(s.categories[0].category)}</div><div class="note">${s.categories[0].share}% of spending</div></div>
+        <div class="fact"><div class="label">Busiest day</div><div class="value">${esc(s.busiestWeekday.day)}</div><div class="note">${num(s.busiestWeekday.transactions)} transactions</div></div>
+        <div class="fact"><div class="label">Categories</div><div class="value">${s.categories.length}</div><div class="note">auto-sorted by merchant name</div></div>
+      </div>
+      <div class="grid2">
+        <div><h3>Top merchants</h3>${bars(s.topMerchants, (m) => m.merchant, (m) => m.totalCents, (m) => `${peso(m.totalCents)} · ${m.visits}×`)}</div>
+        <div><h3>Where it went</h3>${bars(s.categories.slice(0, 6), (c) => c.category, (c) => c.totalCents, (c) => `${c.share}%`)}</div>
+      </div>
+      <div class="fingerprint">fingerprint ${esc(data.fingerprint)}</div>`;
+  }
+
+  function renderHistory(list) {
+    $('historySection').hidden = list.length === 0;
+    $('historyBody').innerHTML = list.map((j) => `
+      <tr class="clickable" data-id="${j.id}">
+        <td>${j.id}</td><td>${esc(j.filename)}</td>
+        <td><span class="status ${j.status}">${j.status}</span></td>
+        <td>${num(j.processedRows)} / ${num(j.totalRows)}</td>
+        <td>${num(j.newRows)} / ${num(j.duplicateRows)} / ${num(j.invalidRows)}</td>
+        <td>${j.runCount}</td>
+        <td><code>${j.summaryFingerprint ? esc(j.summaryFingerprint.slice(0, 12)) : '–'}</code></td>
+      </tr>`).join('');
+  }
+
+  $('historyBody').addEventListener('click', (e) => {
+    const tr = e.target.closest('tr[data-id]');
+    if (!tr) return;
+    currentId = Number(tr.dataset.id);
+    refreshAll();
+  });
+
+  $('crashBtn').addEventListener('click', async () => {
+    if (!currentId) return;
+    $('crashBtn').disabled = true;
+    const r = await api('POST', `/imports/${currentId}/crash-worker`);
+    const msg = $('jobMsg');
+    if (r.status === 202) {
+      msg.className = 'msg bad';
+      msg.textContent = `Killed ${r.data.killed.id} (pid ${r.data.killed.pid}) at row ${r.data.processedRowsAtCrash}. Watch the timeline: a new worker takes over.`;
+    } else {
+      msg.className = 'msg bad';
+      msg.textContent = errText(r);
+    }
+    await refreshAll();
+  });
+
+  $('rerunBtn').addEventListener('click', async () => {
+    if (!currentId) return;
+    const r = await api('POST', `/imports/${currentId}/rerun`);
+    $('jobMsg').className = r.status === 202 ? 'msg ok' : 'msg bad';
+    $('jobMsg').textContent = r.status === 202 ? 'Queued again. Every row is processed a second time; the fingerprint should not change.' : errText(r);
+    await refreshAll();
+  });
+
+  async function refreshAll() {
+    clearTimeout(pollTimer);
+    if (!token) return;
+    const list = await api('GET', '/imports');
+    if (list.status === 401) { setSession(null, null); return; }
+    const imports = list.data.imports;
+    renderHistory(imports);
+    if (!currentId && imports.length) currentId = imports[0].id;
+    let active = false;
+    if (currentId) {
+      const job = await api('GET', `/imports/${currentId}`);
+      if (job.status === 200) {
+        renderJob(job.data);
+        active = job.data.status === 'queued' || job.data.status === 'running';
+      }
+    }
+    renderWrapped((await api('GET', '/wrapped')).data);
+    health();
+    if (active || imports.some((j) => j.status === 'queued' || j.status === 'running')) {
+      pollTimer = setTimeout(refreshAll, 400);
+    }
+  }
+
+  renderSession();
+  health();
+  refreshAll();
+})();
+</script>
+</body>
+</html>

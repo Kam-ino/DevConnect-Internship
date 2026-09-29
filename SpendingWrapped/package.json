@@ -1,0 +1,17 @@
+{
+  "name": "spending-wrapped",
+  "version": "1.0.0",
+  "description": "Upload a spending CSV, get a year-in-review. The import runs in a background worker that survives being killed mid-job.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.13 <25"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test --test-concurrency=1 test/*.test.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

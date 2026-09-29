@@ -114,7 +114,7 @@
       <span><span class="seat"></span>free</span>
       <span><span class="seat taken"></span>reserved</span>
       <span><span class="seat selected"></span>selected</span>
-      <span><span class="seat just-sold"></span>just reserved by the race test</span>
+      <span><span class="seat just-sold"></span>just reserved</span>
     </div>
 
     <div class="panel" id="reservePanel">
@@ -182,7 +182,7 @@
   let eventId = null;
   let freeSeats = [];
   let selected = null;
-  const justSold = new Set();
+  let lastSold = null;
 
   async function getJson(url, init) {
     const res = await fetch(url, init);
@@ -244,27 +244,17 @@
             const sel = selected && selected.id === seat.id ? ' selected' : '';
             cells += `<button class="seat${sel}" type="button" data-id="${seat.id}" title="${label} · ${money(seat.priceCents)}" aria-label="${label}, free"></button>`;
           } else {
-            cells += `<span class="seat taken" title="${label} · reserved"></span>`;
+            const sold = lastSold && lastSold.section === section && lastSold.row === row && lastSold.number === n;
+            cells += `<span class="seat ${sold ? 'just-sold' : 'taken'}" title="${label} · reserved"></span>`;
           }
         }
         return `<div class="row"><span class="label">${row}</span>${cells}</div>`;
       }).join('');
       return `<div class="section"><h3>Section ${section} · ${money(price)}</h3><div class="rows">${rowHtml}</div></div>`;
     }).join('');
-    justSold.forEach((id) => {
-      const el = $('map').querySelector(`[data-sold="${id}"]`);
-      if (el) el.classList.add('just-sold');
-    });
     $('freeStat').innerHTML = `<b>${num(freeSeats.length)}</b> free of ${num(total)}`;
   }
 
-  function markSold(seat) {
-    const cell = [...$('map').querySelectorAll('.row')]
-      .filter((r) => r.querySelector('.label').textContent === seat.row && r.closest('.section').querySelector('h3').textContent.startsWith(`Section ${seat.section} `))[0];
-    if (!cell) return;
-    const el = cell.children[seat.number];
-    if (el) { el.className = 'seat just-sold'; el.removeAttribute('data-id'); }
-  }
 
   function select(seat) {
     selected = seat;
@@ -294,7 +284,7 @@
   $('eventSelect').addEventListener('change', async (e) => {
     eventId = Number(e.target.value);
     select(null);
-    justSold.clear();
+    lastSold = null;
     $('reserveMsg').textContent = '';
     await loadSeats();
   });
@@ -313,14 +303,13 @@
       msg.className = 'msg ok';
       msg.textContent = `201 Created · order ${body.id} for ${body.customer}. Press "Reserve seat" again to see the 409.`;
       $('reserveBtn').disabled = false;
+      lastSold = seat;
       await loadSeats();
-      const el = $('map').querySelector(`[data-id="${seat.id}"]`);
-      if (!el) markSold(seat);
     } else {
       msg.className = 'msg bad';
       msg.textContent = `${res.status} · ${body && body.error ? body.error : 'request failed'}${body && body.field ? ` (field: ${body.field})` : ''}`;
       $('reserveBtn').disabled = res.status !== 409;
-      if (res.status === 409) { select(null); await loadSeats(); markSold(seat); }
+      if (res.status === 409) { select(null); lastSold = seat; await loadSeats(); }
     }
   });
 
@@ -359,8 +348,8 @@
       `${n} requests in ${elapsed.toFixed(0)} ms, handled by ${pids.size} server process${pids.size === 1 ? '' : 'es'}. Seat reserved afterwards: ${after.reserved}.`;
 
     select(null);
+    lastSold = seat;
     await loadSeats();
-    markSold(seat);
     $('raceBtn').disabled = false;
   });
 

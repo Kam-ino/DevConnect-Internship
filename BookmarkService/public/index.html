@@ -126,7 +126,6 @@
     </div>
   </header>
 
-  <!-- ================= ACCEPTANCE CHECKS ================= -->
   <section aria-labelledby="checks-title">
     <div class="sec-head">
       <div>
@@ -141,7 +140,6 @@
     <div class="checks" id="checks"></div>
   </section>
 
-  <!-- ================= PLAYGROUND ================= -->
   <section aria-labelledby="play-title">
     <div class="sec-head">
       <div>
@@ -210,7 +208,6 @@
     </div>
   </section>
 
-  <!-- ================= REFERENCE ================= -->
   <section aria-labelledby="ref-title">
     <div class="sec-head">
       <div>
@@ -247,7 +244,6 @@
   const LONG_URL = 'https://example.com/' + 'a'.repeat(2048 - 20);
   const STATUS_TEXT = { 200: 'OK', 201: 'Created', 204: 'No Content', 400: 'Bad Request', 401: 'Unauthorized', 404: 'Not Found', 413: 'Payload Too Large', 415: 'Unsupported Media Type', 500: 'Internal Server Error' };
 
-  // Demo user for the playground, remembered per browser when storage is available.
   let demoUser = null;
   try { demoUser = localStorage.getItem('bookmark-demo-user'); } catch {}
   if (!demoUser) { demoUser = newUser('demo'); try { localStorage.setItem('bookmark-demo-user', demoUser); } catch {} }
@@ -255,7 +251,6 @@
   $('demoUser').textContent = demoUser;
   $('pUser').value = demoUser;
 
-  // ---------- tiny HTTP helper ----------
   async function call(method, path, { user, json, raw, contentType } = {}) {
     const headers = {};
     if (user != null) headers['X-User-Id'] = user;
@@ -274,13 +269,11 @@
   }
 
   const short = (s, n = 70) => (s.length > n ? s.slice(0, n - 12) + '…' + ` (${s.length} chars)` : s);
-  // Long strings are shown by length, e.g. {"url":"<2048-char string>"}
   const compact = (v) => JSON.stringify(v, (k, x) => (typeof x === 'string' && x.length > 120 ? `<${x.length}-char string>` : x));
   const describeSent = (o) => o.json !== undefined ? short(compact(o.json)) : o.raw !== undefined ? short(o.raw === '' ? '(empty body)' : o.raw.length > 200 ? `<${o.raw.length}-byte body>` : o.raw) + (o.contentType ? `  [${o.contentType}]` : '  [no content-type]') : '';
   const got = (r) => r.status + (r.data && r.data.field ? ` · field=${r.data.field}` : '') + (r.data && r.data.id ? ` · id=${r.data.id}` : '') +
     (r.data && Array.isArray(r.data.bookmarks) ? ` · ${r.data.bookmarks.length} saved` : '');
 
-  // ---------- check runner ----------
   function makeStepper(tbody) {
     let allOk = true;
     return {
@@ -301,7 +294,6 @@
   }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-  // Send one request and record it as a step.
   async function step(S, method, path, opts, expectText, predicate) {
     const res = await call(method, path, opts);
     let ok = false; try { ok = !!predicate(res); } catch {}
@@ -401,7 +393,6 @@
     },
   ];
 
-  // ---------- render check cards ----------
   const checksEl = $('checks');
   const cards = CHECKS.map((c, i) => {
     const d = document.createElement('details');
@@ -443,7 +434,6 @@
   }
   $('runAll').addEventListener('click', runAll);
 
-  // ---------- playground ----------
   const logEl = $('log');
   let firstLog = true;
   function log(method, path, opts, res) {
@@ -486,7 +476,6 @@
   $('doRaw').addEventListener('click', () => send('POST', '/bookmarks', { user: user(), raw: $('pRaw').value, contentType: $('pType').value }));
   $('clearLog').addEventListener('click', () => { logEl.innerHTML = ''; });
 
-  // ---------- health ----------
   fetch(BASE + '/health').then((r) => r.ok).catch(() => false).then((up) => {
     $('healthDot').classList.toggle('down', !up);
     $('healthText').textContent = up ? 'server up' : 'server unreachable';

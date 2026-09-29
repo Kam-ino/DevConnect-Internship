@@ -11,7 +11,6 @@ it('normalises only the safe parts', () => {
     'https://example.com/%7euser': 'https://example.com/%7Euser',
     'https://example.com/page?': 'https://example.com/page',
     'https://example.com/page#': 'https://example.com/page',
-    // left alone on purpose:
     'https://example.com/a/': 'https://example.com/a/',
     'https://example.com/A?b=2&a=1#top': 'https://example.com/A?b=2&a=1#top',
   };

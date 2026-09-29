@@ -1,8 +1,3 @@
-/**
- * All SQL lives here so the route handlers only deal with plain objects.
- * Every query is scoped by user_id: a caller can never see or delete
- * another caller's bookmarks.
- */
 
 const toBookmark = (row) => ({
   id: Number(row.id),
@@ -26,11 +21,6 @@ export function createStore(db) {
   const remove = db.prepare('DELETE FROM bookmarks WHERE user_id = ? AND id = ?');
 
   return {
-    /**
-     * Insert a bookmark unless this user already has the same normalised URL.
-     * Returns { bookmark, created } where created=false means it was a repeat
-     * and `bookmark` is the row that already existed (left unchanged).
-     */
     create({ userId, url, normalizedUrl, title }) {
       const inserted = insert.get(userId, url, normalizedUrl, title, new Date().toISOString());
       if (inserted) return { bookmark: toBookmark(inserted), created: true };
@@ -47,7 +37,6 @@ export function createStore(db) {
       return row ? toBookmark(row) : null;
     },
 
-    /** Returns true if a row was deleted. */
     delete(userId, id) {
       return remove.run(userId, id).changes > 0;
     },

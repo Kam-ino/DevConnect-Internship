@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bookmark Service · Live demo</title>
+<meta name="description" content="Live demo of a bookmark API that survives bad input. Runs every acceptance check against the real server.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f6f0e6;
+    --paper-2: #efe6d8;
+    --card: #fbf7f0;
+    --ink: #1f1a14;
+    --ink-2: #5b5145;
+    --ink-3: #8a7f71;
+    --rule: #ddd1bf;
+    --grid: rgba(120, 96, 64, .07);
+    --accent: #c4501f;
+    --accent-ink: #fff8f1;
+    --pass: #2d6a3e;
+    --pass-bg: #e3efe3;
+    --fail: #b3261e;
+    --fail-bg: #f8e1dd;
+    --run: #8a6d1d;
+    --run-bg: #f5ecd0;
+    --code-bg: #1f1a14;
+    --code-ink: #efe6d8;
+    --shadow: 0 1px 0 rgba(31, 26, 20, .04), 0 8px 24px -12px rgba(31, 26, 20, .18);
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #171411; --paper-2: #1e1a16; --card: #211c17;
+      --ink: #f1e9dc; --ink-2: #c3b7a6; --ink-3: #8f8475;
+      --rule: #3a3229; --grid: rgba(241, 233, 220, .035);
+      --accent: #e0703c; --accent-ink: #1b120c;
+      --pass: #9fe3b0; --pass-bg: #1d3a26;
+      --fail: #f08a7e; --fail-bg: #3a1f1b;
+      --run: #e0c060; --run-bg: #3a321a;
+      --code-bg: #0f0d0b; --code-ink: #e8dfd1;
+      --shadow: 0 1px 0 rgba(0,0,0,.2), 0 10px 30px -14px rgba(0,0,0,.6);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--ink); font: 15px/1.55 var(--sans);
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  a { color: var(--accent); text-underline-offset: 3px; }
+  code, .mono { font-family: var(--mono); font-size: .88em; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---------- header ---------- */
+  header { padding: 56px 0 28px; border-bottom: 2px solid var(--ink); }
+  .eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .tag { border: 1px solid var(--ink); padding: 4px 7px; border-radius: 3px; }
+  h1 { font: 800 clamp(40px, 7vw, 76px)/.95 var(--serif); letter-spacing: -.02em; margin: 18px 0 14px; font-variation-settings: 'SOFT' 50; }
+  h1 em { font-style: italic; font-weight: 400; color: var(--accent); }
+  .lede { font-size: 18px; max-width: 640px; color: var(--ink-2); margin: 0 0 22px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 13px/1.4 var(--mono); color: var(--ink-2); }
+  .meta b { color: var(--ink); font-weight: 600; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pass); display: inline-block; margin-right: 6px; box-shadow: 0 0 0 3px var(--pass-bg); vertical-align: 1px; }
+  .dot.down { background: var(--fail); box-shadow: 0 0 0 3px var(--fail-bg); }
+
+  /* ---------- sections ---------- */
+  section { padding: 44px 0 8px; }
+  .sec-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  h2 { font: 600 30px/1.1 var(--serif); margin: 0; letter-spacing: -.01em; }
+  h2 small { display: block; font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+  .sub { color: var(--ink-2); margin: 6px 0 0; max-width: 620px; }
+
+  .btn {
+    font: 600 14px/1 var(--sans); border: 2px solid var(--ink); background: var(--ink); color: var(--paper);
+    padding: 12px 18px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;
+    box-shadow: 3px 3px 0 var(--accent); transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--accent); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--accent); }
+  .btn:disabled { opacity: .55; cursor: progress; }
+  .btn.ghost { background: transparent; color: var(--ink); box-shadow: none; padding: 9px 13px; font-size: 13px; border-width: 1.5px; }
+  .btn.ghost:hover { background: var(--paper-2); transform: none; }
+  .btn:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- scoreboard ---------- */
+  .score { display: flex; align-items: center; gap: 14px; font: 500 13px var(--mono); color: var(--ink-2); }
+  .score .big { font: 800 34px/1 var(--serif); color: var(--ink); }
+
+  /* ---------- check cards ---------- */
+  .checks { display: grid; gap: 14px; }
+  .check { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; box-shadow: var(--shadow); overflow: hidden; }
+  .check summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 54px 1fr auto; gap: 16px; align-items: center; padding: 18px 20px; }
+  .check summary::-webkit-details-marker { display: none; }
+  .num { font: 800 28px/1 var(--serif); color: var(--ink-3); }
+  .check h3 { font: 600 17px/1.3 var(--sans); margin: 0 0 3px; }
+  .check p.crit { margin: 0; color: var(--ink-2); font-size: 14px; }
+  .stamp {
+    font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; padding: 8px 11px; border-radius: 3px;
+    border: 1.5px solid currentColor; color: var(--ink-3); white-space: nowrap; min-width: 88px; text-align: center;
+  }
+  .stamp.pass { color: var(--pass); background: var(--pass-bg); transform: rotate(-2deg); animation: thunk .25s ease-out; }
+  .stamp.fail { color: var(--fail); background: var(--fail-bg); transform: rotate(2deg); animation: thunk .25s ease-out; }
+  .stamp.run { color: var(--run); background: var(--run-bg); }
+  @keyframes thunk { from { transform: scale(1.35) rotate(-6deg); opacity: 0; } }
+  .check[open] summary { border-bottom: 1px dashed var(--rule); }
+  .body { padding: 6px 20px 18px; }
+  .empty { color: var(--ink-3); font: 13px var(--mono); padding: 12px 0 4px; }
+
+  table.steps { width: 100%; border-collapse: collapse; font: 12.5px/1.45 var(--mono); }
+  table.steps th { text-align: left; font-weight: 500; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; font-size: 11px; padding: 10px 8px 6px; border-bottom: 1px solid var(--rule); }
+  table.steps td { padding: 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  table.steps tr:last-child td { border-bottom: 0; }
+  td.sent { color: var(--ink-2); word-break: break-all; max-width: 360px; }
+  .m { font-weight: 600; }
+  .ok { color: var(--pass); font-weight: 600; }
+  .bad { color: var(--fail); font-weight: 600; }
+  .note { font-size: 13px; color: var(--ink-2); margin: 12px 0 0; }
+  .scroll-x { overflow-x: auto; }
+
+  /* ---------- playground ---------- */
+  .play { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 18px; }
+  .panel { background: var(--card); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; box-shadow: var(--shadow); }
+  label { display: block; font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 7px; }
+  input, textarea, select {
+    width: 100%; font: 14px/1.4 var(--mono); color: var(--ink); background: var(--paper); border: 1.5px solid var(--rule);
+    border-radius: 4px; padding: 10px 11px;
+  }
+  textarea { min-height: 88px; resize: vertical; }
+  .field { margin-bottom: 14px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row > .field { flex: 1 1 120px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; }
+  hr { border: 0; border-top: 1px dashed var(--rule); margin: 18px 0; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 14px; }
+  .chip { font: 12px var(--mono); border: 1px solid var(--rule); background: transparent; color: var(--ink-2); padding: 5px 8px; border-radius: 999px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+  .console { background: var(--code-bg); color: var(--code-ink); border-radius: 6px; padding: 0; min-height: 420px; display: flex; flex-direction: column; box-shadow: var(--shadow); overflow: hidden; }
+  .console-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.08); font: 12px var(--mono); color: #a89c8c; }
+  .console-head button { background: none; border: 0; color: #a89c8c; font: 12px var(--mono); cursor: pointer; text-decoration: underline; }
+  .log { padding: 6px 14px 14px; overflow: auto; max-height: 560px; font: 12.5px/1.5 var(--mono); }
+  .entry { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+  .entry:first-child { animation: slidein .2s ease-out; }
+  @keyframes slidein { from { opacity: 0; transform: translateY(-4px); } }
+  .entry .req { color: #a89c8c; word-break: break-all; }
+  .entry .st { font-weight: 600; }
+  .st.s2 { color: #8fd19e; } .st.s4 { color: #f2b36b; } .st.s5 { color: #ff8a80; }
+  .entry pre { margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; }
+
+  /* ---------- reference ---------- */
+  table.ref { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; font-size: 14px; }
+  table.ref th, table.ref td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  table.ref th { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); background: var(--paper-2); }
+  table.ref tr:last-child td { border-bottom: 0; }
+  .code-pill { font: 600 12px var(--mono); padding: 2px 6px; border-radius: 3px; background: var(--paper-2); border: 1px solid var(--rule); white-space: nowrap; }
+  .readme { background: var(--card); border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 6px; padding: 16px 20px; margin-top: 12px; font-size: 14px; }
+  .readme pre { white-space: pre-wrap; font: 12.5px/1.55 var(--mono); margin: 0; max-height: 320px; overflow: auto; color: var(--ink-2); }
+
+  footer { margin: 56px 0 0; padding: 22px 0 40px; border-top: 2px solid var(--ink); font: 12px var(--mono); color: var(--ink-3); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 820px) {
+    header { padding-top: 36px; }
+    .play { grid-template-columns: 1fr; }
+    .check summary { grid-template-columns: 1fr auto; }
+    .num { display: none; }
+    .console { min-height: 260px; }
+    table.steps { min-width: 640px; }
+    table.ref { min-width: 560px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow"><span class="tag">brief A</span><span>An API that survives bad input</span></div>
+    <h1>Bookmark <em>Service</em></h1>
+    <p class="lede">An HTTP API for saving bookmarks. This page runs every acceptance check against the live server, so you can see each status code for yourself.</p>
+    <div class="meta">
+      <span><span class="dot" id="healthDot"></span><span id="healthText">checking server…</span></span>
+      <span>base <b id="baseUrl"></b></span>
+      <span>your demo user <b id="demoUser"></b></span>
+      <span><a href="https://github.com/Kam-ino/DevConnect-Internship/tree/main/BookmarkService" target="_blank" rel="noopener">source on GitHub ↗</a></span>
+    </div>
+  </header>
+
+  <!-- ================= ACCEPTANCE CHECKS ================= -->
+  <section aria-labelledby="checks-title">
+    <div class="sec-head">
+      <div>
+        <h2 id="checks-title"><small>Part 1</small>Acceptance checks</h2>
+        <p class="sub">Each check sends real requests to this server as a fresh throwaway user, compares the response with the expected result, and shows every request below.</p>
+      </div>
+      <div class="score">
+        <span><span class="big" id="scoreNum">–</span> / 5 passed</span>
+        <button class="btn" id="runAll" type="button">▶ Run all checks</button>
+      </div>
+    </div>
+    <div class="checks" id="checks"></div>
+  </section>
+
+  <!-- ================= PLAYGROUND ================= -->
+  <section aria-labelledby="play-title">
+    <div class="sec-head">
+      <div>
+        <h2 id="play-title"><small>Part 2</small>Try it yourself</h2>
+        <p class="sub">Send your own requests. Everything is scoped to the <code>X-User-Id</code> you choose, and data resets whenever the demo server restarts.</p>
+      </div>
+    </div>
+    <div class="play">
+      <div class="panel">
+        <div class="field">
+          <label for="pUser">X-User-Id header</label>
+          <input id="pUser" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="pUrl">url</label>
+          <input id="pUrl" value="https://example.com/article" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="presets" aria-label="URL presets">
+          <button class="chip" type="button" data-url="">empty</button>
+          <button class="chip" type="button" data-url="HTTPS://EXAMPLE.COM:443/article">same, shouted</button>
+          <button class="chip" type="button" data-url="ftp://example.com/file">ftp://</button>
+          <button class="chip" type="button" data-url="javascript:alert(1)">javascript:</button>
+          <button class="chip" type="button" data-url="__2KB__">2 KB url</button>
+        </div>
+        <div class="field">
+          <label for="pTitle">title <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="pTitle" value="An example article" autocomplete="off">
+        </div>
+        <div class="actions">
+          <button class="btn ghost" type="button" id="doCreate">POST /bookmarks</button>
+          <button class="btn ghost" type="button" id="doList">GET /bookmarks</button>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="pId">id</label>
+            <input id="pId" value="1" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" type="button" id="doGet">GET /bookmarks/:id</button>
+          <button class="btn ghost" type="button" id="doDelete">DELETE /bookmarks/:id</button>
+        </div>
+        <hr>
+        <div class="field">
+          <label for="pRaw">Raw POST body: type anything</label>
+          <textarea id="pRaw" spellcheck="false">{"url": 12345}</textarea>
+        </div>
+        <div class="row" style="align-items:end">
+          <div class="field">
+            <label for="pType">Content-Type</label>
+            <select id="pType">
+              <option>application/json</option>
+              <option>text/plain</option>
+              <option value="">(none)</option>
+            </select>
+          </div>
+          <div class="field" style="flex:0 0 auto">
+            <button class="btn ghost" type="button" id="doRaw">Send raw POST</button>
+          </div>
+        </div>
+      </div>
+      <div class="console" aria-live="polite">
+        <div class="console-head"><span>responses, newest first</span><button type="button" id="clearLog">clear</button></div>
+        <div class="log" id="log"><div class="entry"><span class="req">Send a request to see its status code and body here.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= REFERENCE ================= -->
+  <section aria-labelledby="ref-title">
+    <div class="sec-head">
+      <div>
+        <h2 id="ref-title"><small>Part 3</small>Endpoints</h2>
+        <p class="sub">Every route needs an <code>X-User-Id</code> header. Errors are always <code>{"error": "…", "field": "…"}</code>.</p>
+      </div>
+    </div>
+    <div class="scroll-x">
+      <table class="ref">
+        <thead><tr><th>Request</th><th>Success</th><th>Other documented responses</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST /bookmarks</code></td><td><span class="code-pill">201</span> created<br><span class="code-pill">200</span> already saved, returns the existing one</td><td><span class="code-pill">400</span> bad field · <span class="code-pill">401</span> no user · <span class="code-pill">413</span> body over 16 KB</td></tr>
+          <tr><td><code>GET /bookmarks</code></td><td><span class="code-pill">200</span> your bookmarks, newest first</td><td><span class="code-pill">400</span> / <span class="code-pill">401</span> bad or missing user</td></tr>
+          <tr><td><code>GET /bookmarks/:id</code></td><td><span class="code-pill">200</span> the bookmark</td><td><span class="code-pill">400</span> id not a positive integer · <span class="code-pill">404</span> not found or not yours</td></tr>
+          <tr><td><code>DELETE /bookmarks/:id</code></td><td><span class="code-pill">204</span> deleted</td><td><span class="code-pill">400</span> bad id · <span class="code-pill">404</span> not found or not yours</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span>Node · Express 5 · SQLite (node:sqlite)</span>
+    <span><a href="/README.md" target="_blank" rel="noopener">README.md</a> · <a href="/health" target="_blank" rel="noopener">/health</a></span>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const BASE = location.origin;
+  const $ = (id) => document.getElementById(id);
+  const rand = () => Math.random().toString(36).slice(2, 8);
+  const newUser = (p = 'check') => `${p}-${rand()}${rand()}`;
+  const LONG_URL = 'https://example.com/' + 'a'.repeat(2048 - 20);
+  const STATUS_TEXT = { 200: 'OK', 201: 'Created', 204: 'No Content', 400: 'Bad Request', 401: 'Unauthorized', 404: 'Not Found', 413: 'Payload Too Large', 415: 'Unsupported Media Type', 500: 'Internal Server Error' };
+
+  // Demo user for the playground, remembered per browser when storage is available.
+  let demoUser = null;
+  try { demoUser = localStorage.getItem('bookmark-demo-user'); } catch {}
+  if (!demoUser) { demoUser = newUser('demo'); try { localStorage.setItem('bookmark-demo-user', demoUser); } catch {} }
+  $('baseUrl').textContent = BASE.replace(/^https?:\/\//, '');
+  $('demoUser').textContent = demoUser;
+  $('pUser').value = demoUser;
+
+  // ---------- tiny HTTP helper ----------
+  async function call(method, path, { user, json, raw, contentType } = {}) {
+    const headers = {};
+    if (user != null) headers['X-User-Id'] = user;
+    let body;
+    if (json !== undefined) { body = JSON.stringify(json); headers['Content-Type'] = 'application/json'; }
+    else if (raw !== undefined) { body = raw; if (contentType) headers['Content-Type'] = contentType; }
+    const t0 = performance.now();
+    try {
+      const res = await fetch(BASE + path, { method, headers, body });
+      const text = await res.text();
+      let data = null; try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+      return { status: res.status, data, location: res.headers.get('location'), ms: Math.round(performance.now() - t0) };
+    } catch (err) {
+      return { status: 0, data: { error: String(err) }, ms: Math.round(performance.now() - t0) };
+    }
+  }
+
+  const short = (s, n = 70) => (s.length > n ? s.slice(0, n - 12) + '…' + ` (${s.length} chars)` : s);
+  // Long strings are shown by length, e.g. {"url":"<2048-char string>"}
+  const compact = (v) => JSON.stringify(v, (k, x) => (typeof x === 'string' && x.length > 120 ? `<${x.length}-char string>` : x));
+  const describeSent = (o) => o.json !== undefined ? short(compact(o.json)) : o.raw !== undefined ? short(o.raw === '' ? '(empty body)' : o.raw.length > 200 ? `<${o.raw.length}-byte body>` : o.raw) + (o.contentType ? `  [${o.contentType}]` : '  [no content-type]') : '';
+  const got = (r) => r.status + (r.data && r.data.field ? ` · field=${r.data.field}` : '') + (r.data && r.data.id ? ` · id=${r.data.id}` : '') +
+    (r.data && Array.isArray(r.data.bookmarks) ? ` · ${r.data.bookmarks.length} saved` : '');
+
+  // ---------- check runner ----------
+  function makeStepper(tbody) {
+    let allOk = true;
+    return {
+      get ok() { return allOk; },
+      add(method, path, opts, expectText, res, ok, extra) {
+        allOk = allOk && ok;
+        const tr = document.createElement('tr');
+        const cells = [
+          `<span class="m">${method}</span> ${escapeHtml(path)}`,
+          escapeHtml(describeSent(opts) || '—'),
+          escapeHtml(expectText),
+          `<span class="${ok ? 'ok' : 'bad'}">${ok ? '✓' : '✗'} ${escapeHtml(extra ?? got(res))}</span>`,
+        ];
+        tr.innerHTML = cells.map((c, i) => `<td${i === 1 ? ' class="sent"' : ''}>${c}</td>`).join('');
+        tbody.appendChild(tr);
+      },
+    };
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  // Send one request and record it as a step.
+  async function step(S, method, path, opts, expectText, predicate) {
+    const res = await call(method, path, opts);
+    let ok = false; try { ok = !!predicate(res); } catch {}
+    S.add(method, path, opts, expectText, res, ok);
+    return res;
+  }
+  const is = (code, field) => (r) => r.status === code && (field === undefined || (r.data && r.data.field === field));
+
+  const CHECKS = [
+    {
+      title: 'Three or more endpoints, each returning a documented status code',
+      crit: 'Create → 201, list → 200, fetch → 200, delete → 204, and fetching or deleting it again → 404.',
+      async run(S) {
+        const user = newUser();
+        const c = await step(S, 'POST', '/bookmarks', { user, json: { url: 'https://example.com/docs', title: 'Docs' } }, '201 · id', (r) => r.status === 201 && r.data.id && r.location === `/bookmarks/${r.data.id}`);
+        const id = c.data && c.data.id;
+        await step(S, 'GET', '/bookmarks', { user }, '200 · 1 saved', (r) => r.status === 200 && r.data.bookmarks.length === 1);
+        await step(S, 'GET', `/bookmarks/${id}`, { user }, `200 · id=${id}`, (r) => r.status === 200 && r.data.id === id);
+        await step(S, 'DELETE', `/bookmarks/${id}`, { user }, '204', is(204));
+        await step(S, 'GET', `/bookmarks/${id}`, { user }, '404', is(404));
+        await step(S, 'DELETE', `/bookmarks/${id}`, { user }, '404', is(404));
+        await step(S, 'GET', '/bookmarks', { user: null }, '401 · field=X-User-Id', is(401, 'X-User-Id'));
+      },
+    },
+    {
+      title: 'Malformed input returns 400 with a message naming the field',
+      crit: 'Sends the four inputs from the brief: an empty string, a number, a missing field and a 2 KB URL. Then checks that nothing was saved.',
+      async run(S) {
+        const user = newUser();
+        const bad = [{ url: '' }, { url: 12345 }, { title: 'no url field' }, { url: LONG_URL }];
+        for (const json of bad) {
+          await step(S, 'POST', '/bookmarks', { user, json }, '400 · field=url', (r) => is(400, 'url')(r) && /url/.test(r.data.error));
+        }
+        await step(S, 'POST', '/bookmarks', { user, json: { url: 'https://example.com', title: 42 } }, '400 · field=title', is(400, 'title'));
+        await step(S, 'GET', '/bookmarks/abc', { user }, '400 · field=id', is(400, 'id'));
+        await step(S, 'GET', '/bookmarks', { user }, '200 · 0 saved', (r) => r.status === 200 && r.data.bookmarks.length === 0);
+      },
+    },
+    {
+      title: 'No input produces a 500',
+      crit: 'Sends hostile bodies: broken JSON, an array, a bare null, the wrong content type, dangerous URL schemes, a NUL byte and an oversized body. Every response must be 4xx.',
+      async run(S) {
+        const user = newUser();
+        const cases = [
+          { raw: '{"url": ', contentType: 'application/json' },
+          { raw: '["https://example.com"]', contentType: 'application/json' },
+          { raw: 'null', contentType: 'application/json' },
+          { raw: '', contentType: 'application/json' },
+          { raw: '{"url":"https://example.com"}', contentType: 'text/plain' },
+          { raw: '{"url":"https://example.com"}' },
+          { json: { url: 'javascript:alert(1)' } },
+          { json: { url: 'ftp://example.com/file' } },
+          { json: { url: 'http://[::1' } },
+          { json: { url: 'https://exa\u0000mple.com' } },
+          { json: { url: { href: 'https://example.com' } } },
+          { raw: JSON.stringify({ url: 'https://example.com/' + 'x'.repeat(20000) }), contentType: 'application/json' },
+        ];
+        for (const opts of cases) {
+          await step(S, 'POST', '/bookmarks', { user, ...opts }, '4xx, never 5xx', (r) => r.status >= 400 && r.status < 500);
+        }
+      },
+    },
+    {
+      title: 'The same create request sent twice leaves one row',
+      crit: 'Sends the same request twice, then the same URL spelled differently, then 10 copies at the same moment. The list must still show one bookmark.',
+      async run(S) {
+        const user = newUser();
+        const body = { url: 'https://example.com/guide', title: 'Guide' };
+        const first = await step(S, 'POST', '/bookmarks', { user, json: body }, '201 · new', is(201));
+        const id = first.data && first.data.id;
+        await step(S, 'POST', '/bookmarks', { user, json: body }, `200 · id=${id}`, (r) => r.status === 200 && r.data.id === id);
+        await step(S, 'POST', '/bookmarks', { user, json: { url: 'HTTPS://EXAMPLE.COM:443/guide' } }, `200 · id=${id}`, (r) => r.status === 200 && r.data.id === id);
+        const burst = await Promise.all(Array.from({ length: 10 }, () => call('POST', '/bookmarks', { user, json: body })));
+        const sameId = burst.every((r) => r.status === 200 && r.data.id === id);
+        S.add('POST', '/bookmarks', { user, json: body }, `10 × 200 · id=${id}`, null, sameId, `${burst.map((r) => r.status).join(' ')}`);
+        await step(S, 'GET', '/bookmarks', { user }, '200 · 1 saved', (r) => r.status === 200 && r.data.bookmarks.length === 1);
+        const other = newUser();
+        await step(S, 'POST', '/bookmarks', { user: other, json: body }, '201 · other user gets own row', is(201));
+      },
+    },
+    {
+      title: 'README explains how repeats are recognised',
+      crit: 'Fetches the README from this server and checks that it has the section explaining how repeats are recognised.',
+      async run(S, body) {
+        const res = await fetch(BASE + '/README.md').then(async (r) => ({ status: r.status, text: await r.text() })).catch((e) => ({ status: 0, text: String(e) }));
+        const start = res.text.indexOf('## How repeats are recognised');
+        const ok = res.status === 200 && start !== -1;
+        S.add('GET', '/README.md', {}, '200 · has section', res, ok, ok ? '200 · section found' : `${res.status} · section missing`);
+        if (ok) {
+          const end = res.text.indexOf('\n## ', start + 5);
+          const box = document.createElement('div');
+          box.className = 'readme';
+          box.innerHTML = `<pre>${escapeHtml(res.text.slice(start, end === -1 ? undefined : end).trim())}</pre>`;
+          body.appendChild(box);
+        }
+      },
+    },
+  ];
+
+  // ---------- render check cards ----------
+  const checksEl = $('checks');
+  const cards = CHECKS.map((c, i) => {
+    const d = document.createElement('details');
+    d.className = 'check';
+    d.innerHTML = `
+      <summary>
+        <span class="num">0${i + 1}</span>
+        <div><h3>${escapeHtml(c.title)}</h3><p class="crit">${escapeHtml(c.crit)}</p></div>
+        <span class="stamp">not run</span>
+      </summary>
+      <div class="body"><div class="empty">Press “Run all checks” to send the requests.</div></div>`;
+    checksEl.appendChild(d);
+    return d;
+  });
+
+  let running = false;
+  async function runAll() {
+    if (running) return;
+    running = true;
+    $('runAll').disabled = true;
+    $('runAll').textContent = 'Running…';
+    let passed = 0;
+    for (let i = 0; i < CHECKS.length; i++) {
+      const card = cards[i];
+      const stamp = card.querySelector('.stamp');
+      const body = card.querySelector('.body');
+      stamp.className = 'stamp run'; stamp.textContent = 'running';
+      body.innerHTML = `<div class="scroll-x"><table class="steps"><thead><tr><th>Request</th><th>Sent</th><th>Expected</th><th>Got</th></tr></thead><tbody></tbody></table></div>`;
+      const S = makeStepper(body.querySelector('tbody'));
+      try { await CHECKS[i].run(S, body); } catch (err) { S.add('—', '—', {}, 'no exception', null, false, String(err)); }
+      stamp.className = 'stamp ' + (S.ok ? 'pass' : 'fail');
+      stamp.textContent = S.ok ? 'pass' : 'fail';
+      if (S.ok) passed++; else card.open = true;
+      $('scoreNum').textContent = passed;
+    }
+    $('runAll').disabled = false;
+    $('runAll').textContent = '↻ Run again';
+    running = false;
+  }
+  $('runAll').addEventListener('click', runAll);
+
+  // ---------- playground ----------
+  const logEl = $('log');
+  let firstLog = true;
+  function log(method, path, opts, res) {
+    if (firstLog) { logEl.innerHTML = ''; firstLog = false; }
+    const e = document.createElement('div');
+    e.className = 'entry';
+    const cls = res.status >= 500 || res.status === 0 ? 's5' : res.status >= 400 ? 's4' : 's2';
+    const sent = describeSent(opts);
+    const bodyText = res.data == null ? '(no body)' : typeof res.data === 'string' ? res.data : JSON.stringify(res.data, null, 2);
+    e.innerHTML =
+      `<div class="req">${method} ${escapeHtml(path)}  ·  X-User-Id: ${escapeHtml(opts.user || '(none)')}${sent ? '<br>body: ' + escapeHtml(sent) : ''}</div>` +
+      `<div><span class="st ${cls}">HTTP ${res.status} ${STATUS_TEXT[res.status] || ''}</span> <span class="req">· ${res.ms} ms${res.location ? ' · Location: ' + escapeHtml(res.location) : ''}</span></div>` +
+      `<pre>${escapeHtml(bodyText)}</pre>`;
+    logEl.prepend(e);
+    while (logEl.children.length > 30) logEl.lastChild.remove();
+  }
+  async function send(method, path, opts) {
+    const res = await call(method, path, opts);
+    log(method, path, opts, res);
+    if (method === 'POST' && res.data && res.data.id) $('pId').value = res.data.id;
+    return res;
+  }
+  const user = () => $('pUser').value.trim() || null;
+  const urlValue = () => $('pUrl').dataset.long === '1' ? LONG_URL : $('pUrl').value;
+
+  $('pUrl').addEventListener('input', () => { delete $('pUrl').dataset.long; });
+  document.querySelectorAll('.chip').forEach((chip) => chip.addEventListener('click', () => {
+    const v = chip.dataset.url;
+    if (v === '__2KB__') { $('pUrl').value = LONG_URL.slice(0, 40) + '… (2048 chars)'; $('pUrl').dataset.long = '1'; }
+    else { $('pUrl').value = v; delete $('pUrl').dataset.long; }
+  }));
+  $('doCreate').addEventListener('click', () => {
+    const json = { url: urlValue() };
+    const t = $('pTitle').value; if (t !== '') json.title = t;
+    send('POST', '/bookmarks', { user: user(), json });
+  });
+  $('doList').addEventListener('click', () => send('GET', '/bookmarks', { user: user() }));
+  $('doGet').addEventListener('click', () => send('GET', '/bookmarks/' + encodeURIComponent($('pId').value.trim()), { user: user() }));
+  $('doDelete').addEventListener('click', () => send('DELETE', '/bookmarks/' + encodeURIComponent($('pId').value.trim()), { user: user() }));
+  $('doRaw').addEventListener('click', () => send('POST', '/bookmarks', { user: user(), raw: $('pRaw').value, contentType: $('pType').value }));
+  $('clearLog').addEventListener('click', () => { logEl.innerHTML = ''; });
+
+  // ---------- health ----------
+  fetch(BASE + '/health').then((r) => r.ok).catch(() => false).then((up) => {
+    $('healthDot').classList.toggle('down', !up);
+    $('healthText').textContent = up ? 'server up' : 'server unreachable';
+  });
+})();
+</script>
+</body>
+</html>

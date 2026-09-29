@@ -226,3 +226,25 @@ describe('unknown routes', () => {
     assert.ok(res.body.error);
   });
 });
+
+describe('demo page and housekeeping routes', () => {
+  it('serves the demo page, /health and the README', async () => {
+    const base = api.baseUrl;
+    const page = await fetch(base + '/');
+    assert.equal(page.status, 200);
+    assert.match(page.headers.get('content-type'), /text\/html/);
+    assert.match(await page.text(), /Acceptance checks/);
+
+    assert.equal((await api.request('GET', '/health', { user: null })).status, 200);
+
+    const readme = await fetch(base + '/README.md');
+    assert.equal(readme.status, 200);
+    assert.match(await readme.text(), /## How repeats are recognised/);
+  });
+
+  it('does not expose other project files', async () => {
+    for (const path of ['/package.json', '/src/app.js', '/bookmarks.db']) {
+      assert.equal((await fetch(api.baseUrl + path)).status, 404, path);
+    }
+  });
+});

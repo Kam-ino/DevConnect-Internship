@@ -32,5 +32,5 @@ export async function startServer() {
 
   const close = () => new Promise((resolve) => server.close(() => { db.close(); resolve(); }));
 
-  return { request, rowCount, close };
+  return { request, rowCount, close, baseUrl: base };
 }

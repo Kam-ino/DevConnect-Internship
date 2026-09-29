@@ -1,8 +1,12 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { createStore } from './store.js';
 import { validateCreateBody, validateId, validateUserId } from './validate.js';
 
 export const BODY_LIMIT = '16kb';
+
+const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** Send the one error shape every non-2xx response uses: { error, field? }. */
 function sendError(res, status, message, field) {
@@ -22,6 +26,16 @@ export function createApp({ db }) {
   // throws at us, so that case reaches our validator and gets a 400 naming
   // `url`. Anything bigger is stopped here with a 413.
   app.use(express.json({ limit: BODY_LIMIT }));
+
+  // ---- Demo page and housekeeping (not part of the bookmarks API) ----
+  // GET /            -> public/index.html, a page that runs every reviewer check live
+  // GET /health      -> 200, used by the hosting platform to know the app is up
+  // GET /README.md   -> the README, so the demo page can show the repeat rules
+  app.use(express.static(path.join(PROJECT_ROOT, 'public'), { index: 'index.html' }));
+  app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
+  app.get('/README.md', (req, res) => {
+    res.type('text/markdown; charset=utf-8').sendFile(path.join(PROJECT_ROOT, 'README.md'));
+  });
 
   const bookmarks = express.Router();
 

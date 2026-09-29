@@ -4,6 +4,8 @@ A small HTTP service for saving bookmarks. A caller can create a bookmark, list 
 
 The point of the exercise is the unhappy path: every malformed input comes back as a `400` that names the offending field, nothing malformed is ever saved, no input can produce a `500`, and sending the same create request twice leaves exactly one row.
 
+**Live demo:** https://YOUR-SERVICE.onrender.com. The page runs every acceptance check against the live server. Press **Run all checks**.
+
 **Stack:** Node.js 22.13+ · Express 5 · SQLite via the built-in `node:sqlite` module (no native dependencies) · tests with the built-in `node:test` runner.
 
 ## Running it
@@ -11,8 +13,10 @@ The point of the exercise is the unhappy path: every malformed input comes back 
 ```bash
 npm install
 npm start          # http://localhost:3000, data in ./bookmarks.db
-npm test           # 37 tests, uses an in-memory database
+npm test           # 39 tests, uses an in-memory database
 ```
+
+Open http://localhost:3000 for the demo page.
 
 Environment variables: `PORT` (default `3000`), `DB_FILE` (default `bookmarks.db`, use `:memory:` for a throwaway run).
 
@@ -133,9 +137,40 @@ This makes `POST /bookmarks` safe to retry. If a client's first request timed ou
 - The final error handler maps every known body-parser error to a `4xx`. Only a real server bug can reach its `500` branch.
 - `test/bookmarks.test.js` includes a list of hostile bodies (bare `null`, numbers, arrays, `__proto__` keys, broken IPv6 hosts, NUL bytes, invalid UTF-8, truncated JSON, 50 KB of junk) and checks that none of them get a `5xx`.
 
+## Demo page
+
+`GET /` serves `public/index.html`, a single page with no build step. It:
+
+1. **Runs the acceptance checks.** Each reviewer check is sent as real HTTP requests to the server, using a fresh throwaway user, and every request is shown with its expected and actual result.
+2. **Has a playground.** You can send your own create, list, get, delete or raw-body requests and see the status code and body.
+3. **Lists the endpoints** in a reference table.
+
+Two small extra routes support it: `GET /health` (returns `200 {"status":"ok"}`, used by the host's health check) and `GET /README.md` (this file, so check 5 can confirm the repeat rules are documented). Nothing else from the project folder is served.
+
+## Deploying (Render, free tier)
+
+1. Push this repo to GitHub.
+2. On [render.com](https://render.com), click **New → Web Service** and connect the repo.
+3. Use these settings:
+
+   | Setting | Value |
+   |---|---|
+   | Root Directory | `BookmarkService` |
+   | Runtime | Node |
+   | Build Command | `npm install` |
+   | Start Command | `npm start` |
+   | Instance Type | Free |
+   | Health Check Path | `/health` (under Advanced) |
+
+4. Deploy. Render sets `PORT` itself, and the Node version comes from `engines` in `package.json`.
+
+Things to know about the free tier: the service goes to sleep after 15 minutes without traffic, and the first request after that takes about a minute while it wakes up. The disk is also wiped on every restart, so the SQLite data resets. That's fine for a demo, since every check creates its own data.
+
 ## Project layout
 
 ```
+public/
+  index.html         live demo page (acceptance checks + playground)
 src/
   server.js          starts the HTTP server
   app.js             Express app: routes, status codes, error handler

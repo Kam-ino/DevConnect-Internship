@@ -29,6 +29,7 @@ npm run build      # production build in dist/
 | `src/hours.js` | Opening hours data and the "open now?" logic |
 | `src/hours.test.js` | Tests for `hours.js` (`node --test`, no test framework) |
 | `src/styles.css` | Colour tokens, layout, light and dark themes |
+| `src/assets/reading-room.jpg` | The one photo, bundled by Vite (its origin is embedded in the file) |
 | `PRODUCT.md` | Who the page is for and what it must do |
 
 ## What makes it accessible
@@ -80,10 +81,13 @@ It has **not** been tested with a real screen reader yet. Running through it wit
 
 - The form is front end only. Nothing is sent anywhere.
 - The open/closed stamp uses the visitor's own clock and time zone, and it is worked out when the page loads (it doesn't tick over while the page stays open).
-- The photo loads from picsum.photos. A production site should host it itself.
+
+## Deploying
+
+It builds to static files, so host it as a static site, not a server. On Render: **New → Static Site**, Root Directory `AccessibleLayout`, Build Command `npm install && npm run build`, Publish Directory `dist`.
 
 ## Credits
 
-Reading room photo by [Adam Przewoski](https://unsplash.com/photos/umchkHwkdyM) on Unsplash, served through [Lorem Picsum](https://picsum.photos).
+Reading room photo by [Adam Przewoski](https://unsplash.com/photos/umchkHwkdyM) on Unsplash (Unsplash License), downloaded through [Lorem Picsum](https://picsum.photos) and bundled with the site.
 
 The visual direction was chosen through the Impeccable design skill's direction round. The design record lives in `DESIGN.md`, and the build notes are in `.impeccable/`.

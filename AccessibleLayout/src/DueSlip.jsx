@@ -20,6 +20,9 @@ export default function DueSlip() {
         {status.detail && <span className="status-detail">{status.detail}</span>}
       </p>
 
+      {/* The slip's printed head. Decorative: the table caption names it for assistive tech. */}
+      <p className="date-due" aria-hidden="true">Date due</p>
+
       <table className="due-table">
         <caption className="visually-hidden">Opening hours by day</caption>
         <thead>

@@ -1,5 +1,6 @@
 import DueSlip from './DueSlip.jsx';
 import CardForm from './CardForm.jsx';
+import readingRoom from './assets/reading-room.jpg';
 
 const EVENTS = [
   {
@@ -110,22 +111,12 @@ export default function App() {
           <DueSlip />
         </section>
 
-        <section className="visit wrap axis" aria-labelledby="visit-title">
-          <img className="plate" src="https://picsum.photos/id/192/1200/900" width="1200" height="900" loading="lazy"
-            alt="People working at long tables in a reading room with floor-to-ceiling windows." />
-          <div className="visit-copy">
-            <h2 id="visit-title">Find us</h2>
-            <address>418 Harbor Road, Wrenfield</address>
-            <p>Buses 12 and 40 stop outside. Bike racks are by the side entrance, and the main entrance is step-free.</p>
-          </div>
-        </section>
-
         <section className="events-section wrap axis" id="events" aria-labelledby="events-title">
           <div className="section-intro">
             <h2 id="events-title">Events in October</h2>
             <p>All events are free. Drop in, no booking needed.</p>
           </div>
-          <ol className="slip events" role="list">
+          <ol className="slip ledger" role="list">
             {EVENTS.map((event, index) => {
               const ink = inkFor(index, now);
               return (
@@ -147,8 +138,16 @@ export default function App() {
           </ol>
         </section>
 
-        <section className="faq-section wrap axis" id="faq" aria-labelledby="faq-title">
-          <div className="slip pocket">
+        <div className="visit-faq wrap axis">
+          <section className="visit" aria-labelledby="visit-title">
+            <img className="plate" src={readingRoom} width="1200" height="900" loading="lazy"
+              alt="People working at long tables in a reading room with floor-to-ceiling windows." />
+            <h2 id="visit-title">Find us</h2>
+            <address>418 Harbor Road, Wrenfield</address>
+            <p>Buses 12 and 40 stop outside. Bike racks are by the side entrance, and the main entrance is step-free.</p>
+          </section>
+
+          <section className="slip pocket" id="faq" aria-labelledby="faq-title">
             <h2 className="printed" id="faq-title">Questions</h2>
             {QUESTIONS.map(({ q, a }) => (
               <details key={q}>
@@ -156,11 +155,11 @@ export default function App() {
                 <p>{a}</p>
               </details>
             ))}
-          </div>
-          <p className="faq-aside">
-            Something else? Call <a href="tel:+13125550148">(312) 555-0148</a> or ask at the main desk.
-          </p>
-        </section>
+            <p className="pocket-foot">
+              Something else? Call <a href="tel:+13125550148">(312) 555-0148</a> or ask at the main desk.
+            </p>
+          </section>
+        </div>
 
         <section className="card-section wrap axis" id="card" aria-labelledby="card-title">
           <CardForm />

@@ -126,8 +126,8 @@ main:focus { outline: none; }
   margin-inline: auto;
 }
 
-/* The page axis: on wide screens every section splits 5 / 7, so the slip's
-   date column lines up down the whole page. */
+/* The page axis: on wide screens the page has 12 columns and column 6 is the
+   date column, so stamped dates line up down the whole page. */
 .axis { display: grid; gap: 2.5rem; }
 
 @media (min-width: 60rem) {
@@ -137,10 +137,25 @@ main:focus { outline: none; }
   }
   .axis > :first-child { grid-column: 1 / 6; }
   .axis > :last-child { grid-column: 6 / -1; }
-  .faq-section > .pocket,
   .card-section > .borrower-card { grid-column: 6 / -1; grid-row: 1; }
-  .faq-section > .faq-aside,
   .card-section > .next { grid-column: 1 / 6; grid-row: 1; }
+}
+
+/* Card-stock tooth on the field. Fixed and click-through, so it never repaints on scroll. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.22 0 0 0 0 0 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  opacity: 0.22;
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Kept faint: any stronger and the screen blend greys the violet ink pad. */
+  body::before { opacity: 0.1; mix-blend-mode: screen; }
 }
 
 /* Paper */
@@ -306,50 +321,66 @@ main:focus { outline: none; }
   color: var(--print);
 }
 
-/* Find us */
-.visit,
+/* The slip's printed head, centred between double rules like a real date-due slip */
+.date-due {
+  margin: 0 0 0.25rem;
+  padding-block: 0.35rem;
+  border-block: 3px double var(--print);
+  color: var(--print);
+  font: 700 1.375rem/1 var(--stamp-face);
+  letter-spacing: 0.35em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .events-section,
-.faq-section,
+.visit-faq,
 .card-section { padding-block: clamp(2.5rem, 5vw, 4.5rem); }
 
-.plate {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  border: 0.5rem solid var(--slip);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
-.visit { align-items: center; }
-address { margin-bottom: 1rem; font-size: 1.375rem; font-style: normal; font-weight: 700; }
-
-/* Events: a slip of stamped dates */
+/* Events: one wide ledger of stamped dates */
 .section-intro { align-self: start; }
-@media (min-width: 60rem) {
-  .events-section .section-intro { position: sticky; top: 2rem; }
-}
 
-.events {
-  margin: 0;
-  list-style: none;
-}
+.ledger { margin: 0; list-style: none; }
 .event {
   display: grid;
-  grid-template-columns: 6.25rem minmax(0, 1fr);
-  grid-template-areas:
-    "stamp title"
-    "stamp ticket"
-    "stamp text";
-  column-gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
   padding-block: 1.5rem;
   border-bottom: 1px solid var(--rule);
 }
 .event:first-child { padding-top: 0; }
 .event:last-child { padding-bottom: 0; border-bottom: 0; }
-.event h3 { grid-area: title; margin-bottom: 0.25rem; }
-.event-stamp { grid-area: stamp; margin: 0; }
-.ticket { grid-area: ticket; margin-bottom: 0.5rem; color: var(--muted); font: 0.9375rem/1.5 var(--typed); }
-.event-text { grid-area: text; margin: 0; }
+.event h3 { margin: 0; }
+/* On phones the stamp sits above the entry; in the markup it follows the title. */
+.event-stamp { order: -1; margin: 0 0 0.5rem; }
+.ticket { margin: 0; color: var(--muted); font: 0.9375rem/1.5 var(--typed); }
+.event-text { margin: 0.25rem 0 0; }
+
+@media (min-width: 40rem) {
+  .event { grid-template-columns: 7.5rem minmax(0, 1fr); column-gap: 2rem; }
+  .event-stamp { grid-column: 1; grid-row: 1 / span 3; margin: 0; }
+  .event > :not(.event-stamp) { grid-column: 2; }
+}
+
+/* Wide screens: the ledger borrows the page's 12 columns (subgrid), so every
+   date stamp sits on the same axis as the hours slip. */
+@media (min-width: 60rem) {
+  .events-section > .ledger {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+  .ledger .event {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    column-gap: normal; /* keep the page's gutters, or the columns drift off the axis */
+    align-items: start;
+  }
+  .ledger .event h3 { grid-column: 1 / 6; grid-row: 1; }
+  .ledger .event-text { grid-column: 1 / 6; grid-row: 2; }
+  .ledger .event-stamp { grid-column: 6 / 8; grid-row: 1 / span 2; }
+  .ledger .ticket { grid-column: 8 / -1; grid-row: 1 / span 2; font-size: 1rem; }
+}
 
 .event-stamp .stamp {
   --tilt: -4deg;
@@ -363,9 +394,21 @@ address { margin-bottom: 1rem; font-size: 1.375rem; font-style: normal; font-wei
 .event.ink-past .stamp { color: var(--stamp-dry); }
 
 @media (min-width: 40rem) {
-  .event { grid-template-columns: 7.5rem minmax(0, 1fr); column-gap: 2rem; }
   .event.ink-next .stamp { font-size: 2rem; }
 }
+
+/* Find us: a tipped-in photo plate on the field */
+.visit-faq { align-items: start; }
+.plate {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 1.75rem;
+  object-fit: cover;
+  border: 0.5rem solid var(--slip);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+address { margin-bottom: 1rem; font-size: 1.375rem; font-style: normal; font-weight: 700; }
 
 /* Questions: the rules printed on the book pocket */
 .pocket { padding-top: 3.5rem; overflow: hidden; }
@@ -413,7 +456,12 @@ details[open] summary::after { background-size: 100% 3px, 3px 0; }
 }
 details p { padding-bottom: 1.25rem; margin: 0; }
 
-.faq-aside { align-self: end; max-width: 28ch; }
+.pocket-foot {
+  margin: 0;
+  padding-top: 1.25rem;
+  border-top: 3px double var(--print);
+  font-size: 1rem;
+}
 
 /* The borrower card */
 .borrower-card { display: grid; align-content: start; }
@@ -450,22 +498,33 @@ form {
   padding: 0;
   border: 0;
 }
-label, legend { font-weight: 700; }
+/* Field names are printed on the card in red caps; answers are typed on the ruled line. */
+.field > label,
+legend {
+  color: var(--print);
+  font: 700 1.125rem/1.2 var(--stamp-face);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 legend { padding: 0; margin-bottom: 0.25rem; }
 .hint { margin: 0; color: var(--muted); font-size: 1rem; }
 
 input[type="text"],
 input[type="email"] {
   width: 100%;
-  min-height: 3rem;
-  padding: 0.625rem 0.75rem;
-  border: 2px solid var(--muted);
-  border-radius: var(--radius);
-  background: var(--slip);
+  min-height: 2.75rem;
+  padding: 0.375rem 0.25rem;
+  border: 0;
+  border-bottom: 2px solid var(--print);
+  border-radius: 0;
+  background: transparent;
   color: var(--ink);
-  font: 1.0625rem var(--typed);
+  font: 1.1875rem var(--typed);
 }
-input[aria-invalid="true"] { border-color: var(--error); border-width: 3px; }
+input[aria-invalid="true"] {
+  border-bottom: 4px solid var(--error);
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+}
 
 .choice {
   display: flex;
@@ -473,13 +532,45 @@ input[aria-invalid="true"] { border-color: var(--error); border-width: 3px; }
   gap: 0.75rem;
   min-height: 2.75rem;
 }
+.choice label { cursor: pointer; }
+
+/* Tick boxes drawn like the ones printed on a paper form; the mark is stamped in ink. */
 .choice input {
+  display: grid;
+  place-content: center;
   flex: none;
   width: 1.5rem;
   height: 1.5rem;
   margin: 0;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
 }
-.choice label { font-weight: 400; cursor: pointer; }
+.choice input[type="checkbox"] { border-radius: var(--radius); }
+.choice input::before {
+  content: "";
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--stamp);
+  scale: 0;
+}
+.choice input[type="checkbox"]::before {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 0;
+  clip-path: polygon(12% 50%, 0 64%, 40% 100%, 100% 18%, 86% 4%, 40% 72%);
+}
+.choice input:checked::before { scale: 1; }
+.choice input[aria-invalid="true"] { border-color: var(--error); border-width: 3px; }
+
+/* Windows high contrast mode can't see the drawn marks, so fall back to native controls there. */
+@media (forced-colors: active) {
+  .choice input { appearance: auto; }
+  .choice input::before { display: none; }
+}
 
 .error { margin: 0; color: var(--error); font-weight: 700; }
 .error:empty { display: none; }

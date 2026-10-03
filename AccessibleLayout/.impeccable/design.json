@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-03T04:22:09.953Z",
-  "title": "Design System: Wrenfield Library",
+  "generatedAt": "2026-10-03T16:06:22.997Z",
+  "title": "Design System: Wrenfield Frontend Day",
   "extensions": {
     "colorMeta": {
       "field": {
@@ -378,29 +378,89 @@
         "displayName": "Printed",
         "purpose": "Uppercase slip titles in Printer's Red."
       },
+      "printed-head": {
+        "displayName": "Printed Head",
+        "purpose": "Letter-spaced red head between double rules: the day's date and the badge's event name."
+      },
       "stamp-status": {
         "displayName": "Stamp Status",
-        "purpose": "The live open/closed stamp; the largest type on the page."
+        "purpose": "The live countdown or ON NOW stamp; the largest type on the page."
+      },
+      "stamp-detail": {
+        "displayName": "Stamp Detail",
+        "purpose": "The detail line inside the status stamp."
       },
       "stamp-row": {
         "displayName": "Stamp Row",
-        "purpose": "Stamped hours rows and event dates; today and the next event go 700 and larger."
+        "purpose": "Stamped times in the glance and schedule tables."
+      },
+      "stamp-row-fresh": {
+        "displayName": "Stamp Row Fresh",
+        "purpose": "The time stamp of the slot running now."
+      },
+      "stamp-registered": {
+        "displayName": "Registered Stamp",
+        "purpose": "The REGISTERED stamp on the badge."
+      },
+      "badge-name": {
+        "displayName": "Badge Name",
+        "purpose": "The attendee's name on the badge."
+      },
+      "brand": {
+        "displayName": "Brand",
+        "purpose": "The event name in header and footer."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Stamped button labels."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Red uppercase form field names and legends."
+      },
+      "label-table": {
+        "displayName": "Table Label",
+        "purpose": "Red uppercase table column heads."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Event titles and H3s."
+        "purpose": "H3s."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "The intro paragraph under the H1, 30ch."
       },
       "body": {
         "displayName": "Body",
         "purpose": "All reading text, 65ch measure, tabular numerals."
       },
-      "label": {
-        "displayName": "Label",
-        "purpose": "Red uppercase form field names, legends and table heads; buttons at 1.375rem."
+      "body-small": {
+        "displayName": "Body Small",
+        "purpose": "Hints, the questions foot, the footer, nav on phones."
+      },
+      "nav": {
+        "displayName": "Nav",
+        "purpose": "Header links from 40rem."
       },
       "typed": {
         "displayName": "Typed",
-        "purpose": "Event tickets, input values and the Today tag."
+        "purpose": "Speakers and rooms in the schedule."
+      },
+      "typed-list": {
+        "displayName": "Typed List",
+        "purpose": "The on-now session list and the badge date."
+      },
+      "typed-badge": {
+        "displayName": "Typed Badge",
+        "purpose": "Attendance line on the badge."
+      },
+      "typed-input": {
+        "displayName": "Typed Input",
+        "purpose": "Input and textarea values."
+      },
+      "typed-tag": {
+        "displayName": "Typed Tag",
+        "purpose": "The On now tag."
       }
     },
     "shadows": [
@@ -413,6 +473,16 @@
         "name": "paper-on-card-night",
         "value": "0 1px 2px rgb(0 0 0 / 0.4), 0 18px 40px -18px rgb(0 0 0 / 0.7)",
         "purpose": "Same role in the dark scheme."
+      },
+      {
+        "name": "punched-slot",
+        "value": "inset 0 1px 2px rgb(0 0 0 / 0.3), 0 0 0 1px var(--rule)",
+        "purpose": "The lanyard slot cut through the badge card (light scheme)."
+      },
+      {
+        "name": "punched-slot-night",
+        "value": "inset 0 1px 2px rgb(0 0 0 / 0.6), 0 0 0 1.5px var(--muted)",
+        "purpose": "Same role at night, with a stronger edge so the dark hole stays visible."
       }
     ],
     "motion": [
@@ -424,12 +494,12 @@
       {
         "name": "press",
         "value": "480ms",
-        "purpose": "Stamp lands from 1.2x scale and 10% opacity; status on load, ISSUED on submit. Skipped under reduced motion."
+        "purpose": "Stamp lands from 1.2x scale and 10% opacity; status on load, REGISTERED on submit. Skipped under reduced motion."
       },
       {
         "name": "button",
         "value": "150ms",
-        "purpose": "Button background and 1px press translate."
+        "purpose": "Button background and 1px press translate, both variants."
       },
       {
         "name": "disclosure",
@@ -457,79 +527,95 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one button: a stamped violet label for the primary action.",
-      "html": "<button class=\"ds-button\">Apply for a card</button>",
-      "css": ".ds-button{display:inline-flex;align-items:center;min-height:3.25rem;padding:0.5rem 1.75rem;border:2px solid var(--stamp);border-radius:var(--radius,4px);background:var(--stamp);color:var(--on-stamp);font:700 1.375rem/1 var(--stamp-face);letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background-color 0.15s,transform 0.15s}.ds-button:hover{border-color:var(--stamp-hover);background:var(--stamp-hover)}.ds-button:active{transform:translateY(1px)}.ds-button:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
+      "description": "A stamped violet label for the primary action.",
+      "html": "<button class=\"ds-button\">Register</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;min-height:3.25rem;padding:0.5rem 1.75rem;border:2px solid var(--stamp);border-radius:var(--radius,4px);background:var(--stamp);color:var(--on-stamp);font:700 1.375rem/1 var(--stamp-face);letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background-color 0.15s,transform 0.15s}.ds-button:hover{border-color:var(--stamp-hover);background:var(--stamp-hover)}.ds-button:active{transform:translateY(1px)}.ds-button:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Secondary action: stamp border and violet text on a transparent fill.",
+      "html": "<button class=\"ds-button ds-quiet\">Register someone else</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;justify-content:center;min-height:3.25rem;padding:0.5rem 1.75rem;border:2px solid var(--stamp);border-radius:var(--radius,4px);background:var(--stamp);color:var(--on-stamp);font:700 1.375rem/1 var(--stamp-face);letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background-color 0.15s,transform 0.15s}.ds-button:hover{border-color:var(--stamp-hover);background:var(--stamp-hover)}.ds-button:active{transform:translateY(1px)}.ds-button:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}.ds-quiet{background:transparent;color:var(--stamp)}.ds-quiet:hover{background:color-mix(in srgb,var(--stamp) 12%,transparent);color:var(--stamp)}"
     },
     {
       "name": "Slip",
       "kind": "card",
       "refersTo": "slip",
       "description": "Paper card on the field with a red printed title.",
-      "html": "<section class=\"ds-slip\"><h2 class=\"ds-printed\">Opening hours</h2><p>Paper resting on card stock.</p></section>",
+      "html": "<section class=\"ds-slip\"><h2 class=\"ds-printed\">Questions</h2><p>Paper resting on card stock.</p></section>",
       "css": ".ds-slip{padding:clamp(1.25rem,3vw,2.25rem);border:1px solid transparent;border-radius:var(--radius,4px);background:var(--slip);color:var(--ink);box-shadow:var(--shadow);font:1.125rem/1.6 var(--read)}.ds-printed{margin:0 0 1rem;color:var(--print);font:700 clamp(1.75rem,1.4rem + 1.2vw,2.5rem)/0.95 var(--stamp-face);letter-spacing:0.04em;text-transform:uppercase}"
-    },
-    {
-      "name": "Ruled Input",
-      "kind": "input",
-      "refersTo": "input-ruled",
-      "description": "A typed answer on a red ruled line, under a red printed field name.",
-      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-name\">Full name</label><input class=\"ds-input\" id=\"ds-name\" type=\"text\"></div>",
-      "css": ".ds-field{display:grid;gap:0.5rem}.ds-label{color:var(--print);font:700 1.125rem/1.2 var(--stamp-face);letter-spacing:0.06em;text-transform:uppercase}.ds-input{width:100%;min-height:2.75rem;padding:0.375rem 0.25rem;border:0;border-bottom:2px solid var(--print);border-radius:0;background:transparent;color:var(--ink);font:1.1875rem var(--typed)}.ds-input[aria-invalid=\"true\"]{border-bottom:4px solid var(--error);background:color-mix(in srgb,var(--error) 8%,transparent)}.ds-input:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
     },
     {
       "name": "Status Stamp",
       "kind": "custom",
       "refersTo": "status-stamp",
-      "description": "The live open/closed stamp, double-framed and tilted; red when closed.",
-      "html": "<p class=\"ds-status\"><span class=\"ds-status-date\">Sat, 3 Oct 2026</span><strong class=\"ds-status-head\">Open now</strong><span class=\"ds-status-detail\">until 5 pm</span></p>",
-      "css": ".ds-status{display:grid;justify-items:start;gap:0.15rem;width:fit-content;margin:0;padding:0.6rem 1rem 0.75rem;border:0.4rem double currentColor;border-radius:var(--radius,4px);color:var(--stamp);font-family:var(--stamp-face);font-weight:700;line-height:1;text-transform:uppercase;rotate:-3deg}.ds-status-date{font-size:1.125rem;letter-spacing:0.08em}.ds-status-head{font-size:clamp(3rem,2rem + 3.4vw,5.25rem);line-height:0.92}.ds-status-detail{font-size:clamp(1.375rem,1.1rem + 0.8vw,1.875rem);font-weight:600}"
+      "description": "The live countdown or ON NOW stamp, double-framed and tilted, with the on-now sessions typed beneath.",
+      "html": "<p class=\"ds-status\"><strong class=\"ds-status-head\">On now</strong><span class=\"ds-status-detail\">until 11:05 am</span></p><ul class=\"ds-now\"><li>Semantic HTML is a feature, Hall A</li><li>Forms that explain their errors, Hall B</li></ul>",
+      "css": ".ds-status{display:grid;justify-items:start;gap:0.15rem;width:fit-content;margin:0.25rem 0 1.75rem;padding:0.6rem 1rem 0.75rem;border:0.4rem double currentColor;border-radius:var(--radius,4px);color:var(--stamp);font-family:var(--stamp-face);font-weight:700;line-height:1;text-transform:uppercase;rotate:-3deg}.ds-status-head{font-size:clamp(3rem,2rem + 3.4vw,5.25rem);line-height:0.92}.ds-status-detail{font-size:clamp(1.375rem,1.1rem + 0.8vw,1.875rem);font-weight:600}.ds-now{margin:-0.5rem 0 0;padding:0;list-style:none;color:var(--ink);font:1rem/1.5 var(--typed)}"
     },
     {
-      "name": "Event Date Stamp",
+      "name": "Glance Table",
       "kind": "custom",
-      "refersTo": "event-stamp",
-      "description": "Framed day-month stamp; dry ink once the event has passed.",
-      "html": "<time class=\"ds-date-stamp\">10 Oct</time> <time class=\"ds-date-stamp ds-dry\">2 Oct</time>",
-      "css": ".ds-date-stamp{display:inline-block;padding:0.3rem 0.45rem;border:3px solid currentColor;border-radius:var(--radius,4px);color:var(--stamp);font:700 1.5rem/1 var(--stamp-face);text-transform:uppercase;text-align:center;rotate:-4deg}.ds-dry{color:var(--stamp-dry)}"
+      "refersTo": "row-stamp",
+      "description": "Day at a glance: label left, stamped time right; fresh row bold with an On now tag, past rows dry.",
+      "html": "<table class=\"ds-glance\"><thead><tr><th>What</th><th>Time</th></tr></thead><tbody><tr class=\"ds-dry\"><th>Doors open</th><td><time class=\"ds-row\" style=\"rotate:-1.2deg\">8:30 am</time></td></tr><tr class=\"ds-fresh\"><th>Morning talks<span class=\"ds-tag\">On now</span></th><td><time class=\"ds-row\" style=\"rotate:0.8deg\">10:15 am</time></td></tr><tr><th>Lunch</th><td><time class=\"ds-row\" style=\"rotate:-0.5deg\">12:20 pm</time></td></tr></tbody></table>",
+      "css": ".ds-glance{width:100%;border-collapse:collapse;color:var(--ink);font:1.125rem/1.6 var(--read)}.ds-glance th,.ds-glance td{padding:0.55rem 0;border-bottom:1px solid var(--rule);text-align:left;vertical-align:middle}.ds-glance thead th{border-bottom:2px solid var(--print);color:var(--print);font:700 1rem/1.2 var(--stamp-face);letter-spacing:0.06em;text-transform:uppercase}.ds-glance tbody th{font-weight:400}.ds-glance td,.ds-glance thead th:last-child{text-align:right}.ds-row{display:inline-block;color:var(--stamp);font:600 1.375rem/1 var(--stamp-face);text-transform:uppercase}.ds-fresh>th{font-weight:700}.ds-fresh .ds-row{font-size:1.75rem;font-weight:700}.ds-dry .ds-row{color:var(--stamp-dry)}.ds-tag{margin-left:0.6rem;color:var(--stamp);font:700 0.875rem var(--typed);white-space:nowrap}"
+    },
+    {
+      "name": "Attendee Badge",
+      "kind": "card",
+      "refersTo": "badge-card",
+      "description": "Badge card with a punched lanyard slot; after registering it shows the name, attendance and a REGISTERED stamp.",
+      "html": "<div class=\"ds-badge-card\"><p class=\"ds-head\">Wrenfield Frontend Day</p><p class=\"ds-name\">Ana Reyes</p><p class=\"ds-mode\">In person at Harbor Hall</p><p class=\"ds-date\">Thursday 15 October 2026</p><p class=\"ds-reg\"><span>Registered</span><span class=\"ds-reg-date\">4 Oct 2026</span></p></div>",
+      "css": ".ds-badge-card{position:relative;display:grid;align-content:start;padding:3.25rem clamp(1.25rem,3vw,2.25rem) clamp(1.25rem,3vw,2.25rem);border-radius:var(--radius,4px);background:var(--slip);color:var(--ink);box-shadow:var(--shadow)}.ds-badge-card::before{content:\"\";position:absolute;top:1.25rem;left:50%;width:4rem;height:0.75rem;border-radius:999px;background:var(--field);box-shadow:inset 0 1px 2px rgb(0 0 0 / 0.3),0 0 0 1px var(--rule);translate:-50% 0}.ds-head{margin:0;padding-block:0.35rem;border-block:3px double var(--print);color:var(--print);font:700 1.375rem/1 var(--stamp-face);letter-spacing:0.2em;text-align:center;text-transform:uppercase}.ds-name{margin:1.25rem 0 0.5rem;font:700 clamp(2.25rem,1.75rem + 2vw,3.5rem)/1 var(--stamp-face);overflow-wrap:anywhere;text-transform:uppercase}.ds-mode{margin:0;font:1.0625rem/1.5 var(--typed)}.ds-date{margin:0;color:var(--muted);font:1rem/1.5 var(--typed)}.ds-reg{display:grid;justify-items:center;width:fit-content;margin:1.25rem 0 0;padding:0.5rem 1rem;border:0.35rem double currentColor;border-radius:var(--radius,4px);color:var(--stamp);font:700 2rem/1 var(--stamp-face);text-transform:uppercase;rotate:-8deg}.ds-reg-date{font-size:1.125rem;letter-spacing:0.06em}"
+    },
+    {
+      "name": "Ruled Input",
+      "kind": "input",
+      "refersTo": "input-ruled",
+      "description": "A typed answer on a red ruled line under a red printed field name; the textarea carries three ruled lines.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-name\">Full name</label><input class=\"ds-input\" id=\"ds-name\" type=\"text\"></div><div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-access\">Access needs</label><textarea class=\"ds-textarea\" id=\"ds-access\" rows=\"3\"></textarea></div>",
+      "css": ".ds-field{display:grid;gap:0.5rem}.ds-label{color:var(--print);font:700 1.125rem/1.2 var(--stamp-face);letter-spacing:0.06em;text-transform:uppercase}.ds-input{width:100%;min-height:2.75rem;padding:0.375rem 0.25rem;border:0;border-bottom:2px solid var(--print);border-radius:0;background:transparent;color:var(--ink);font:1.1875rem var(--typed)}.ds-input[aria-invalid=\"true\"]{border-bottom:4px solid var(--error);background:color-mix(in srgb,var(--error) 8%,transparent)}.ds-input:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}.ds-textarea{width:100%;min-height:calc(1.6em * 3 + 0.75rem);padding:0.375rem 0.25rem;border:0;border-bottom:2px solid var(--print);border-radius:0;color:var(--ink);font:1.1875rem/1.6 var(--typed);background:linear-gradient(transparent calc(1.6em - 1px),var(--rule) 0) 0 0.375rem/100% 1.6em local;resize:vertical}.ds-textarea:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
     },
     {
       "name": "Tick Choice",
       "kind": "input",
       "description": "Drawn radio and checkbox; the mark is stamped in violet.",
-      "html": "<label class=\"ds-choice\"><input type=\"radio\" name=\"ds-c\" checked> Adult, 16 and over</label><label class=\"ds-choice\"><input type=\"checkbox\" checked> Email me the events list</label>",
+      "html": "<label class=\"ds-choice\"><input type=\"radio\" name=\"ds-c\" checked> In person at Harbor Hall</label><label class=\"ds-choice\"><input type=\"checkbox\" checked> Email me the slides after the event</label>",
       "css": ".ds-choice{display:flex;align-items:center;gap:0.75rem;min-height:2.75rem;color:var(--ink);font:1.125rem/1.6 var(--read);cursor:pointer}.ds-choice input{display:grid;place-content:center;flex:none;width:1.5rem;height:1.5rem;margin:0;border:2px solid var(--ink);border-radius:50%;background:transparent;appearance:none;cursor:pointer}.ds-choice input[type=\"checkbox\"]{border-radius:var(--radius,4px)}.ds-choice input::before{content:\"\";width:0.75rem;height:0.75rem;border-radius:50%;background:var(--stamp);scale:0}.ds-choice input[type=\"checkbox\"]::before{width:0.875rem;height:0.875rem;border-radius:0;clip-path:polygon(12% 50%,0 64%,40% 100%,100% 18%,86% 4%,40% 72%)}.ds-choice input:checked::before{scale:1}.ds-choice input:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
     },
     {
       "name": "Navigation",
       "kind": "nav",
       "description": "Plain ink links with the underline hidden until hover.",
-      "html": "<nav class=\"ds-nav\"><a href=\"#\">Opening hours</a><a href=\"#\">Events</a><a href=\"#\">Questions</a><a href=\"#\">Get a card</a></nav>",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\">Schedule</a><a href=\"#\">Venue</a><a href=\"#\">Questions</a><a href=\"#\">Register</a></nav>",
       "css": ".ds-nav{display:flex;flex-wrap:wrap;gap:0 1.5rem;font:1.0625rem/1.6 var(--read)}.ds-nav a{display:inline-block;padding-block:0.6rem;color:var(--field-ink);text-decoration-thickness:1px;text-underline-offset:0.2em;text-decoration-color:transparent}.ds-nav a:hover{text-decoration-color:currentColor}.ds-nav a:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
     },
     {
-      "name": "Pocket Question",
+      "name": "Question",
       "kind": "custom",
       "description": "Disclosure row with a drawn violet plus that loses its upright when open.",
-      "html": "<details class=\"ds-q\"><summary>Do I need a card to visit?</summary><p>No. Anyone can come in.</p></details>",
+      "html": "<details class=\"ds-q\"><summary>Does it cost anything?</summary><p>No. Places are free, in person and online.</p></details>",
       "css": ".ds-q{border-bottom:1px solid var(--rule);color:var(--ink);font:1.125rem/1.6 var(--read)}.ds-q summary{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding-block:1rem;font-weight:700;list-style:none;cursor:pointer}.ds-q summary::-webkit-details-marker{display:none}.ds-q summary::after{content:\"\";flex:none;width:1.125rem;height:1.125rem;margin-top:0.3rem;background:linear-gradient(var(--stamp) 0 0) center/100% 3px no-repeat,linear-gradient(var(--stamp) 0 0) center/3px 100% no-repeat;transition:background-size 0.2s cubic-bezier(0.16,1,0.3,1)}.ds-q[open] summary::after{background-size:100% 3px,3px 0}.ds-q p{margin:0;padding-bottom:1.25rem}.ds-q summary:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
     }
   ],
   "narrative": {
-    "northStar": "The Date-Due Slip",
-    "overview": "The page is library stationery. A goldenrod card-stock field carries slip-white paper cards; the paper is printed in red (headings, field names, rules) and then stamped in violet ink (every date, time, status and action). Reading text is set in a high-legibility sans and stays out of the stamp vocabulary, so the stationery never costs comprehension.\n\nThe world has three materials and each has one job: the field is the desk, the slip is paper, ink is what the library did to the paper. Stamps are real, selectable text roughened by an SVG displacement filter and tilted a few degrees, never images. Freshness of ink encodes time: today and the next event are darker and larger, past rows and events are dry ink.\n\nAt night the materials swap rather than dim. The field becomes the violet ink pad, the slips go deep violet, and the ink turns goldenrod. Density is calm: one wide column of facts per slip, generous section padding, a 65ch reading measure.",
+    "northStar": "The Stamped Programme",
+    "overview": "The page is conference stationery. A goldenrod card-stock field carries slip-white paper cards; the paper is printed in red (titles, column heads, field names, rules) and then stamped in violet ink (every time, the live status, the registration mark and every action). Reading text is set in a high-legibility sans and stays out of the stamp vocabulary, so the stationery never costs comprehension.\n\nThe world has three materials and each has one job: the field is the desk, the slip is paper, ink is what the organisers did to the paper. Stamps are real, selectable text roughened by an SVG displacement filter and tilted a few degrees, never images. Freshness of ink encodes time: the slot running now is darker and larger with a typed \"On now\" tag, slots that are over are dry ink.\n\nAt night the materials swap rather than dim. The field becomes the violet ink pad, the slips go deep violet, and the ink turns goldenrod. Density is calm: one slip per idea, generous section padding, a 65ch reading measure.",
     "keyCharacteristics": [
       "Goldenrod field, slip-white paper, violet ink, red print.",
       "Stamped type is condensed, uppercase, tilted and filter-roughened live text.",
-      "Ink freshness (fresh, wet, dry) marks today versus past.",
-      "A 12-column page axis whose column 6 is the date column.",
-      "One soft paper shadow; everything else is flat.",
+      "Ink freshness (fresh, standard, dry) marks now versus past.",
+      "A 12-column page axis: copy on columns 1 to 5, slips from column 6.",
+      "One soft paper shadow; the only other depth is the lanyard slot punched into the badge card.",
       "Dark scheme inverts field and ink instead of dimming."
     ],
     "rules": [
       {
         "name": "The Two Inks Rule",
-        "body": "Violet is what the library stamped or what you can press; red is what came printed on the stationery. Never set an action in red or a printed label in violet.",
+        "body": "Violet is what was stamped or what you can press; red is what came printed on the stationery. Never set an action in red or a printed label in violet.",
         "section": "colors"
       },
       {
@@ -539,7 +625,7 @@
       },
       {
         "name": "The Fresh Ink Rule",
-        "body": "Freshness carries time. The current item gets fresh ink and the largest size, past items get dry ink, everything else gets the standard stamp.",
+        "body": "Freshness carries time. The current slot gets the fresh stamp size and bold label, past slots get dry ink, everything else gets the standard stamp.",
         "section": "colors"
       },
       {
@@ -549,25 +635,25 @@
       },
       {
         "name": "The Real Text Rule",
-        "body": "Stamps are live text with an SVG ink filter; the heavy speckled filter is for display-size stamps only, small stamps (row size and below) get the edge-only fine filter so speckle never costs legibility.",
+        "body": "Stamps are live text with an SVG ink filter; the speckled filter is for display-size stamps (status, REGISTERED), row-size stamps get the edge-only fine filter so speckle never costs legibility.",
         "section": "typography"
       },
       {
-        "name": "The Date Column Rule",
-        "body": "On wide screens column 6 is the date column. Any new dated content aligns its stamp to it.",
+        "name": "The Slip Side Rule",
+        "body": "On wide screens paper lives from column 6 to the end and the field's copy lives in columns 1 to 5; only content that genuinely needs the full measure (the timetable) spans both.",
         "section": "layout"
       },
       {
         "name": "The Paper Only Rule",
-        "body": "Shadow belongs to paper objects lying on the field. Controls, stamps and text never lift.",
+        "body": "Shadow belongs to paper objects lying on the field, and inset shadow to holes cut through paper. Controls, stamps and text never lift.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "Do stamp every date, time and status in violet Barlow uppercase as live text through the ink filter.",
+      "Do stamp every time, status and registration mark in violet Barlow uppercase as live text through the ink filter.",
       "Do print slip titles, field names, table heads and rules in Printer's Red.",
-      "Do align new dated content to the column 6 date axis on wide screens.",
-      "Do use ink freshness (fresh, standard, dry) to show where today falls.",
+      "Do keep paper on the column 6 side of the axis on wide screens; span all 12 columns only for content that needs the width.",
+      "Do use ink freshness (fresh, standard, dry) to show where now falls in the day.",
       "Do use the night tokens for dark mode so the field becomes the ink pad and ink turns goldenrod.",
       "Do gate every motion (press, transitions, smooth scroll) behind prefers-reduced-motion and show the final state instantly otherwise.",
       "Do keep every text and background pair at WCAG AA in both schemes."
@@ -576,8 +662,8 @@
       "Don't set reading sentences in Barlow Condensed or stamps in Atkinson.",
       "Don't use the speckled ink filter on stamps at row size or smaller; use the fine filter.",
       "Don't set actions in red or printed labels in violet.",
-      "Don't add shadows to anything that is not paper on the field.",
-      "Don't add small uppercase labels above headings; the only printed head is DATE DUE between double rules on the hours slip.",
+      "Don't add shadows to anything that is not paper on the field or a hole punched through it.",
+      "Don't add small uppercase labels above headings; printed heads between double rules are reserved for the day's date and the badge's event name.",
       "Don't replace live stamped text with images of stamps."
     ]
   }

@@ -1,65 +1,33 @@
-import DueSlip from './DueSlip.jsx';
-import CardForm from './CardForm.jsx';
+import ProgrammeSlip from './ProgrammeSlip.jsx';
+import Schedule from './Schedule.jsx';
+import RegisterForm from './RegisterForm.jsx';
 import readingRoom from './assets/reading-room.jpg';
-
-const EVENTS = [
-  {
-    title: 'E-book help drop-in',
-    start: '2026-10-10T10:30',
-    when: 'Saturday, 10:30 am to 12:30 pm',
-    where: 'Main desk, ground floor. Adults and teens.',
-    text: "Bring a phone, tablet or e-reader and we'll set up free e-book borrowing with your card.",
-  },
-  {
-    title: 'Story time for under-fives',
-    start: '2026-10-14T10:30',
-    when: 'Wednesday, 10:30 am',
-    where: "Children's room. Ages 0 to 5 with a grown-up.",
-    text: 'Picture books, songs and a craft table.',
-  },
-  {
-    title: 'Large-print book swap',
-    start: '2026-10-22T14:00',
-    when: 'Thursday, 2 pm to 4 pm',
-    where: 'Reading room. Everyone welcome.',
-    text: "Bring large-print books you've finished and take home new ones.",
-  },
-  {
-    title: 'Try a screen reader',
-    start: '2026-10-29T18:00',
-    when: 'Thursday, 6 pm to 7:30 pm',
-    where: 'Study room 2. Laptops provided.',
-    text: 'A hands-on introduction to NVDA and VoiceOver.',
-  },
-];
 
 const QUESTIONS = [
   {
-    q: 'Do I need a card to visit?',
-    a: 'No. Anyone can come in to read, use a desk or connect to the free Wi-Fi. You only need a card to borrow.',
+    q: 'Does it cost anything?',
+    a: "No. Places are free, in person and online. We ask you to register so we know how many seats and lunches to plan for.",
   },
   {
-    q: 'Is the building step-free?',
-    a: 'Yes. There is a ramp at the Harbor Road entrance, a lift to both floors and an accessible toilet on the ground floor. The main desk has a hearing loop.',
+    q: 'Are the talks accessible?',
+    a: 'Every talk has live captions on screen and in the stream. Hall A has a hearing loop and a sign language interpreter, and slides are shared the day before.',
   },
   {
-    q: 'How many items can I borrow?',
-    a: 'Up to 12 items for three weeks. You can renew each item twice, online or at the desk.',
+    q: 'Is the venue step-free?',
+    a: 'Yes. The Harbor Road entrance is step-free, lifts reach both floors, and there are accessible toilets and a quiet room on each floor.',
   },
   {
-    q: 'What happens if I return something late?',
-    a: "We don't charge late fees. We'll email you a reminder, and you can bring it back next time you visit.",
+    q: 'Can I come for part of the day?',
+    a: 'Yes. Come for the talks you want. Your registration covers the whole day, and you can leave and come back.',
   },
 ];
 
-// The next upcoming event gets the biggest stamp; events already over are stamped in dry ink.
-function inkFor(index, now) {
-  const next = EVENTS.findIndex((event) => new Date(event.start) >= now);
-  if (next === -1 || index < next) return 'past';
-  return index === next ? 'next' : 'later';
+// Reviewers can preview any moment of the day, for example ?now=2026-10-15T10:40
+function currentTime() {
+  const param = new URLSearchParams(window.location.search).get('now');
+  const preview = param ? new Date(param) : null;
+  return preview && !Number.isNaN(preview.getTime()) ? { now: preview, preview: true } : { now: new Date(), preview: false };
 }
-
-const stampDay = (start) => new Date(start).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
 // Roughens stamped type so it reads as rubber on paper. The text underneath stays real, selectable text.
 function InkFilter() {
@@ -82,7 +50,7 @@ function InkFilter() {
 }
 
 export default function App() {
-  const now = new Date();
+  const { now, preview } = currentTime();
 
   return (
     <>
@@ -90,13 +58,13 @@ export default function App() {
       <a className="skip-link" href="#main">Skip to main content</a>
 
       <header className="site-header wrap">
-        <a className="brand" href="./">Wrenfield Library</a>
+        <a className="brand" href="./">Wrenfield Frontend Day</a>
         <nav aria-label="Main">
           <ul className="nav" role="list">
-            <li><a href="#hours">Opening hours</a></li>
-            <li><a href="#events">Events</a></li>
+            <li><a href="#schedule">Schedule</a></li>
+            <li><a href="#venue">Venue</a></li>
             <li><a href="#faq">Questions</a></li>
-            <li><a href="#card">Get a card</a></li>
+            <li><a href="#register">Register</a></li>
           </ul>
         </nav>
       </header>
@@ -104,50 +72,33 @@ export default function App() {
       <main id="main" tabIndex={-1}>
         <section className="hero wrap axis" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <h1 id="hero-title">Your library on Harbor Road</h1>
-            <p className="lede">Borrow books, find a quiet desk or join a free class. Everyone is welcome, card or no card.</p>
-            <a className="button" href="#card">Get a card</a>
+            <h1 id="hero-title">Wrenfield Frontend Day</h1>
+            <p className="lede">A free one-day conference on building accessible websites. Thursday 15 October at Harbor Hall, or online.</p>
+            <a className="button" href="#register">Register</a>
           </div>
-          <DueSlip />
+          <ProgrammeSlip now={now} preview={preview} />
         </section>
 
-        <section className="events-section wrap axis" id="events" aria-labelledby="events-title">
+        <section className="schedule-section wrap axis" id="schedule" aria-labelledby="schedule-title">
           <div className="section-intro">
-            <h2 id="events-title">Events in October</h2>
-            <p>All events are free. Drop in, no booking needed.</p>
+            <h2 id="schedule-title">Schedule</h2>
+            <p>Hall A and Hall B run side by side between the keynote and the closing panel. Every talk is captioned.</p>
           </div>
-          <ol className="slip ledger" role="list">
-            {EVENTS.map((event, index) => {
-              const ink = inkFor(index, now);
-              return (
-                <li key={event.title} className={`event ink-${ink}`}>
-                  <h3>{event.title}</h3>
-                  <p className="event-stamp">
-                    <time className="stamp" dateTime={event.start}>{stampDay(event.start)}</time>
-                  </p>
-                  <p className="ticket">
-                    {ink === 'past' && <strong>This event has passed. </strong>}
-                    {event.when}
-                    <br />
-                    {event.where}
-                  </p>
-                  <p className="event-text">{event.text}</p>
-                </li>
-              );
-            })}
-          </ol>
+          <div className="slip schedule-card">
+            <Schedule now={now} />
+          </div>
         </section>
 
-        <div className="visit-faq wrap axis">
-          <section className="visit" aria-labelledby="visit-title">
+        <div className="venue-faq wrap axis">
+          <section id="venue" aria-labelledby="venue-title">
             <img className="plate" src={readingRoom} width="1200" height="900" loading="lazy"
               alt="People working at long tables in a reading room with floor-to-ceiling windows." />
-            <h2 id="visit-title">Find us</h2>
-            <address>418 Harbor Road, Wrenfield</address>
+            <h2 id="venue-title">Venue</h2>
+            <address>Harbor Hall, 418 Harbor Road, Wrenfield</address>
             <p>Buses 12 and 40 stop outside. Bike racks are by the side entrance, and the main entrance is step-free.</p>
           </section>
 
-          <section className="slip pocket" id="faq" aria-labelledby="faq-title">
+          <section className="slip questions" id="faq" aria-labelledby="faq-title">
             <h2 className="printed" id="faq-title">Questions</h2>
             {QUESTIONS.map(({ q, a }) => (
               <details key={q}>
@@ -155,36 +106,34 @@ export default function App() {
                 <p>{a}</p>
               </details>
             ))}
-            <p className="pocket-foot">
-              Something else? Call <a href="tel:+13125550148">(312) 555-0148</a> or ask at the main desk.
+            <p className="questions-foot">
+              Something else? Email <a href="mailto:hello@wrenfield-frontend.example">hello@wrenfield-frontend.example</a>.
             </p>
           </section>
         </div>
 
-        <section className="card-section wrap axis" id="card" aria-labelledby="card-title">
-          <CardForm />
+        <section className="register-section wrap axis" id="register" aria-labelledby="register-title">
+          <RegisterForm />
           <div className="next">
             <h3>What happens next</h3>
             <ol className="next-steps">
-              <li>We email your card number within one working day.</li>
-              <li>Bring photo ID the first time you borrow a book.</li>
-              <li>Use the number to borrow e-books straight away.</li>
+              <li>We email your confirmation within a day.</li>
+              <li>In person: show the email at the door, on your phone or printed.</li>
+              <li>Online: the stream link arrives on the morning of the event.</li>
             </ol>
           </div>
         </section>
       </main>
 
       <footer className="site-footer wrap axis">
-        <p className="brand">Wrenfield Library</p>
+        <p className="brand">Wrenfield Frontend Day</p>
         <div className="footer-details">
           <p>
-            418 Harbor Road, Wrenfield
+            Harbor Hall, 418 Harbor Road, Wrenfield
             <br />
-            <a href="tel:+13125550148">(312) 555-0148</a>
-            <br />
-            <a href="mailto:hello@wrenfield-library.example">hello@wrenfield-library.example</a>
+            <a href="mailto:hello@wrenfield-frontend.example">hello@wrenfield-frontend.example</a>
           </p>
-          <p>Wrenfield Library is fictional. This page is a practice project for the DevConnect frontend track.</p>
+          <p>Wrenfield Frontend Day is fictional. This page is a practice project for the DevConnect frontend track.</p>
         </div>
       </footer>
     </>

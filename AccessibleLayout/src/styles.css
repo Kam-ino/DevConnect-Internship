@@ -1,0 +1,521 @@
+/* Wrenfield Library: a date-due slip on goldenrod card stock, stamped in violet ink.
+   Every text and background pair passes WCAG AA in both schemes. */
+:root {
+  color-scheme: light dark;
+  --field: #f2b705;
+  --field-ink: #1d1a24;
+  --slip: #f7f8fa;
+  --ink: #1d1a24;
+  --muted: #4d4760;
+  --stamp: #4c2c92;
+  --stamp-hover: #3a1f75;
+  --stamp-dry: #7562a8;
+  --on-stamp: #f7f8fa;
+  --print: #c8102e;
+  --rule: #ecb4bd;
+  --error: #b0102b;
+  --shadow: 0 1px 2px rgb(92 58 0 / 0.2), 0 18px 40px -18px rgb(92 58 0 / 0.45);
+  --radius: 4px;
+  --gutter: 1rem;
+  --read: "Atkinson Hyperlegible Next Variable", system-ui, sans-serif;
+  --typed: "Atkinson Hyperlegible Mono Variable", ui-monospace, monospace;
+  --stamp-face: "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+/* At night the field becomes the ink pad and the ink turns goldenrod. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --field: #17112a;
+    --field-ink: #f1edf9;
+    --slip: #221a3a;
+    --ink: #f1edf9;
+    --muted: #c0b8d6;
+    --stamp: #f2b705;
+    --stamp-hover: #ffcb3d;
+    --stamp-dry: #b8962e;
+    --on-stamp: #17112a;
+    --print: #ff7a90;
+    --rule: #4a3462;
+    --error: #ff9aa8;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 18px 40px -18px rgb(0 0 0 / 0.7);
+  }
+}
+
+@media (min-width: 48rem) {
+  :root { --gutter: 2rem; }
+}
+
+/* Base and browser surfaces */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  accent-color: var(--stamp);
+  caret-color: var(--stamp);
+  scrollbar-color: var(--stamp) var(--field);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  margin: 0;
+  background: var(--field);
+  color: var(--field-ink);
+  font: 1.125rem/1.6 var(--read);
+  font-variant-numeric: tabular-nums;
+}
+
+::selection { background: var(--stamp); color: var(--on-stamp); }
+
+img { display: block; max-width: 100%; height: auto; }
+
+h1, h2, h3 { margin: 0 0 0.5em; text-wrap: balance; }
+h1, h2 { font-family: var(--stamp-face); font-weight: 700; line-height: 0.95; }
+h1 { font-size: clamp(2.75rem, 1.5rem + 3.6vw, 5rem); letter-spacing: -0.01em; }
+h2 { font-size: clamp(2rem, 1.5rem + 2vw, 3.25rem); }
+h3 { font-size: 1.25rem; line-height: 1.25; }
+
+p { margin: 0 0 1em; max-width: 65ch; }
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+a:hover { text-decoration-thickness: 3px; }
+.slip a { color: var(--stamp); }
+
+:focus-visible {
+  outline: 3px solid var(--stamp);
+  outline-offset: 3px;
+}
+/* <main> only takes focus from the skip link; it is not a control. */
+main:focus { outline: none; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ink-filter { position: absolute; width: 0; height: 0; }
+
+.skip-link {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  background: var(--stamp);
+  color: var(--on-stamp);
+  font-weight: 700;
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+.wrap {
+  width: min(100% - 2 * var(--gutter), 78rem);
+  margin-inline: auto;
+}
+
+/* The page axis: on wide screens every section splits 5 / 7, so the slip's
+   date column lines up down the whole page. */
+.axis { display: grid; gap: 2.5rem; }
+
+@media (min-width: 60rem) {
+  .axis {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: clamp(1.5rem, 3vw, 3rem);
+  }
+  .axis > :first-child { grid-column: 1 / 6; }
+  .axis > :last-child { grid-column: 6 / -1; }
+  .faq-section > .pocket,
+  .card-section > .borrower-card { grid-column: 6 / -1; grid-row: 1; }
+  .faq-section > .faq-aside,
+  .card-section > .next { grid-column: 1 / 6; grid-row: 1; }
+}
+
+/* Paper */
+.slip {
+  position: relative;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border: 1px solid transparent; /* shows as an outline in forced-colors mode */
+  border-radius: var(--radius);
+  background: var(--slip);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.printed {
+  margin-bottom: 1rem;
+  color: var(--print);
+  font-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Ink */
+.stamp {
+  display: inline-block;
+  color: var(--stamp);
+  font-family: var(--stamp-face);
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  filter: url(#ink);
+  rotate: var(--tilt, 0deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .press { animation: press 480ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+}
+
+@keyframes press {
+  from { opacity: 0.1; transform: scale(1.2); }
+  45% { opacity: 1; }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Buttons are stamped labels */
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3.25rem;
+  padding: 0.5rem 1.75rem;
+  border: 2px solid var(--stamp);
+  border-radius: var(--radius);
+  background: var(--stamp);
+  color: var(--on-stamp);
+  font: 700 1.375rem/1 var(--stamp-face);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.button:hover { border-color: var(--stamp-hover); background: var(--stamp-hover); }
+.button:active { transform: translateY(1px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .button { transition: background-color 0.15s, transform 0.15s; }
+}
+
+/* Header */
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 2rem;
+  padding-block: 1rem;
+}
+
+.brand {
+  margin: 0;
+  font: 700 1.75rem/1 var(--stamp-face);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .nav { gap: 0 1.5rem; font-size: 1.0625rem; }
+}
+.nav a {
+  display: inline-block;
+  padding-block: 0.6rem;
+  text-decoration-color: transparent;
+}
+.nav a:hover { text-decoration-color: currentColor; }
+
+/* First viewport: copy on the left, the slip owns the right */
+.hero { padding-block: 1.5rem 4rem; align-items: start; }
+.hero-copy { padding-top: clamp(0.5rem, 4vw, 3.5rem); }
+.lede { max-width: 30ch; margin-bottom: 2rem; font-size: 1.25rem; }
+
+.due-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.due-table th,
+.due-table td {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: middle;
+}
+.due-table thead th {
+  border-bottom: 2px solid var(--print);
+  color: var(--print);
+  font: 700 1rem/1.2 var(--stamp-face);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.due-table tbody th { font-weight: 400; }
+.due-table td,
+.due-table thead th:last-child { text-align: right; }
+
+.today-tag {
+  margin-left: 0.6rem;
+  color: var(--stamp);
+  font: 700 0.875rem var(--typed);
+}
+.is-today th { font-weight: 700; }
+
+.row-stamp { font-size: 1.375rem; font-weight: 600; filter: url(#ink-fine); }
+.row-stamp.ink-fresh { font-size: 1.75rem; font-weight: 700; }
+.row-stamp.ink-dry { color: var(--stamp-dry); }
+
+/* The live status: the one mark that owns the slip */
+.status-stamp {
+  --tilt: -3deg;
+  display: grid;
+  justify-items: start;
+  gap: 0.15rem;
+  width: fit-content;
+  margin: 0.25rem 0 1.75rem;
+  padding: 0.6rem 1rem 0.75rem;
+  border: 0.4rem double currentColor;
+  border-radius: var(--radius);
+}
+.status-stamp.is-closed { color: var(--print); }
+.status-date { font-size: 1.125rem; letter-spacing: 0.08em; }
+.status-headline { font-size: clamp(3rem, 2rem + 3.4vw, 5.25rem); line-height: 0.92; }
+.status-detail { font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.875rem); font-weight: 600; }
+
+.closure {
+  margin: 1.25rem 0 0;
+  color: var(--print);
+}
+
+/* Find us */
+.visit,
+.events-section,
+.faq-section,
+.card-section { padding-block: clamp(2.5rem, 5vw, 4.5rem); }
+
+.plate {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 0.5rem solid var(--slip);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.visit { align-items: center; }
+address { margin-bottom: 1rem; font-size: 1.375rem; font-style: normal; font-weight: 700; }
+
+/* Events: a slip of stamped dates */
+.section-intro { align-self: start; }
+@media (min-width: 60rem) {
+  .events-section .section-intro { position: sticky; top: 2rem; }
+}
+
+.events {
+  margin: 0;
+  list-style: none;
+}
+.event {
+  display: grid;
+  grid-template-columns: 6.25rem minmax(0, 1fr);
+  grid-template-areas:
+    "stamp title"
+    "stamp ticket"
+    "stamp text";
+  column-gap: 1.5rem;
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.event:first-child { padding-top: 0; }
+.event:last-child { padding-bottom: 0; border-bottom: 0; }
+.event h3 { grid-area: title; margin-bottom: 0.25rem; }
+.event-stamp { grid-area: stamp; margin: 0; }
+.ticket { grid-area: ticket; margin-bottom: 0.5rem; color: var(--muted); font: 0.9375rem/1.5 var(--typed); }
+.event-text { grid-area: text; margin: 0; }
+
+.event-stamp .stamp {
+  --tilt: -4deg;
+  padding: 0.3rem 0.45rem;
+  border: 3px solid currentColor;
+  border-radius: var(--radius);
+  font-size: 1.5rem;
+  text-align: center;
+}
+.event.ink-next .stamp { --tilt: -6deg; font-size: 1.75rem; }
+.event.ink-past .stamp { color: var(--stamp-dry); }
+
+@media (min-width: 40rem) {
+  .event { grid-template-columns: 7.5rem minmax(0, 1fr); column-gap: 2rem; }
+  .event.ink-next .stamp { font-size: 2rem; }
+}
+
+/* Questions: the rules printed on the book pocket */
+.pocket { padding-top: 3.5rem; overflow: hidden; }
+.pocket::before {
+  /* the thumb notch at the top of a library book pocket */
+  content: "";
+  position: absolute;
+  top: -2.25rem;
+  left: 50%;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background: var(--field);
+  translate: -50% 0;
+}
+.pocket .printed { text-align: center; }
+
+details { border-bottom: 1px solid var(--rule); }
+details:last-of-type { border-bottom: 0; }
+summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-block: 1rem;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+summary::-webkit-details-marker { display: none; }
+/* A drawn plus that loses its upright when open */
+summary::after {
+  content: "";
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.3rem;
+  background:
+    linear-gradient(var(--stamp) 0 0) center / 100% 3px no-repeat,
+    linear-gradient(var(--stamp) 0 0) center / 3px 100% no-repeat;
+}
+details[open] summary::after { background-size: 100% 3px, 3px 0; }
+@media (prefers-reduced-motion: no-preference) {
+  summary::after { transition: background-size 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+}
+details p { padding-bottom: 1.25rem; margin: 0; }
+
+.faq-aside { align-self: end; max-width: 28ch; }
+
+/* The borrower card */
+.borrower-card { display: grid; align-content: start; }
+.borrower-card > p { margin-bottom: 0; }
+
+.issued-stamp {
+  --tilt: -8deg;
+  display: grid;
+  justify-items: center;
+  width: fit-content;
+  margin: 1.5rem 0 0;
+  padding: 0.5rem 1rem;
+  border: 0.35rem double currentColor;
+  border-radius: var(--radius);
+  font-size: 2rem;
+}
+.issued-date { font-size: 1.125rem; letter-spacing: 0.06em; }
+
+@media (min-width: 60rem) {
+  .issued-stamp { position: absolute; top: 1.5rem; right: 1.75rem; margin: 0; }
+}
+
+form {
+  display: grid;
+  gap: 1.75rem;
+  margin-top: 2rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+label, legend { font-weight: 700; }
+legend { padding: 0; margin-bottom: 0.25rem; }
+.hint { margin: 0; color: var(--muted); font-size: 1rem; }
+
+input[type="text"],
+input[type="email"] {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.625rem 0.75rem;
+  border: 2px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--slip);
+  color: var(--ink);
+  font: 1.0625rem var(--typed);
+}
+input[aria-invalid="true"] { border-color: var(--error); border-width: 3px; }
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+}
+.choice input {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+}
+.choice label { font-weight: 400; cursor: pointer; }
+
+.error { margin: 0; color: var(--error); font-weight: 700; }
+.error:empty { display: none; }
+
+.error-summary {
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 3px solid var(--error);
+  border-radius: var(--radius);
+}
+.error-summary:focus { outline: 3px solid var(--stamp); outline-offset: 3px; }
+.error-summary ul { margin: 0; padding-left: 1.25rem; }
+.error-summary a { color: var(--error); font-weight: 700; }
+
+.form-status:empty { display: none; }
+.form-status {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--stamp);
+  border-radius: var(--radius);
+  font-weight: 700;
+}
+
+.next { align-self: start; padding-top: clamp(0.5rem, 2vw, 2rem); }
+.next-steps { margin: 0; padding-left: 1.25rem; }
+.next-steps li { margin-bottom: 0.75rem; }
+
+/* Footer */
+.site-footer {
+  padding-block: 2.5rem 3rem;
+  border-top: 2px solid var(--field-ink);
+  font-size: 1rem;
+}
+.footer-details { display: grid; gap: 0.5rem 2rem; }
+.site-footer a { display: inline-block; padding-block: 0.25rem; }
+
+@media (min-width: 40rem) {
+  .footer-details { grid-template-columns: 1fr 1fr; }
+}

@@ -1,0 +1,584 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-03T04:22:09.953Z",
+  "title": "Design System: Wrenfield Library",
+  "extensions": {
+    "colorMeta": {
+      "field": {
+        "role": "neutral",
+        "displayName": "Goldenrod Card Stock",
+        "canonical": "oklch(80% 0.165 85)",
+        "tonalRamp": [
+          "oklch(15% 0.083 85)",
+          "oklch(25% 0.165 85)",
+          "oklch(35% 0.165 85)",
+          "oklch(45% 0.165 85)",
+          "oklch(55% 0.165 85)",
+          "oklch(65% 0.165 85)",
+          "oklch(80% 0.165 85)",
+          "oklch(95% 0.083 85)"
+        ]
+      },
+      "field-ink": {
+        "role": "neutral",
+        "displayName": "Pressed Black-Violet (on field)",
+        "canonical": "oklch(22% 0.017 300)",
+        "tonalRamp": [
+          "oklch(15% 0.009 300)",
+          "oklch(25% 0.017 300)",
+          "oklch(35% 0.017 300)",
+          "oklch(45% 0.017 300)",
+          "oklch(55% 0.017 300)",
+          "oklch(65% 0.017 300)",
+          "oklch(80% 0.017 300)",
+          "oklch(95% 0.009 300)"
+        ]
+      },
+      "slip": {
+        "role": "neutral",
+        "displayName": "Slip White",
+        "canonical": "oklch(98% 0.003 265)",
+        "tonalRamp": [
+          "oklch(15% 0.002 265)",
+          "oklch(25% 0.003 265)",
+          "oklch(35% 0.003 265)",
+          "oklch(45% 0.003 265)",
+          "oklch(55% 0.003 265)",
+          "oklch(65% 0.003 265)",
+          "oklch(80% 0.003 265)",
+          "oklch(95% 0.002 265)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Pressed Black-Violet",
+        "canonical": "oklch(22% 0.017 300)",
+        "tonalRamp": [
+          "oklch(15% 0.009 300)",
+          "oklch(25% 0.017 300)",
+          "oklch(35% 0.017 300)",
+          "oklch(45% 0.017 300)",
+          "oklch(55% 0.017 300)",
+          "oklch(65% 0.017 300)",
+          "oklch(80% 0.017 300)",
+          "oklch(95% 0.009 300)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Faded Ink",
+        "canonical": "oklch(42% 0.04 295)",
+        "tonalRamp": [
+          "oklch(15% 0.020 295)",
+          "oklch(25% 0.040 295)",
+          "oklch(35% 0.040 295)",
+          "oklch(45% 0.040 295)",
+          "oklch(55% 0.040 295)",
+          "oklch(65% 0.040 295)",
+          "oklch(80% 0.040 295)",
+          "oklch(95% 0.020 295)"
+        ]
+      },
+      "stamp": {
+        "role": "primary",
+        "displayName": "Stamp-Pad Violet",
+        "canonical": "oklch(38% 0.15 293)",
+        "tonalRamp": [
+          "oklch(15% 0.075 293)",
+          "oklch(25% 0.150 293)",
+          "oklch(35% 0.150 293)",
+          "oklch(45% 0.150 293)",
+          "oklch(55% 0.150 293)",
+          "oklch(65% 0.150 293)",
+          "oklch(80% 0.150 293)",
+          "oklch(95% 0.075 293)"
+        ]
+      },
+      "stamp-hover": {
+        "role": "primary",
+        "displayName": "Fresh Ink",
+        "canonical": "oklch(31% 0.13 293)",
+        "tonalRamp": [
+          "oklch(15% 0.065 293)",
+          "oklch(25% 0.130 293)",
+          "oklch(35% 0.130 293)",
+          "oklch(45% 0.130 293)",
+          "oklch(55% 0.130 293)",
+          "oklch(65% 0.130 293)",
+          "oklch(80% 0.130 293)",
+          "oklch(95% 0.065 293)"
+        ]
+      },
+      "stamp-dry": {
+        "role": "primary",
+        "displayName": "Dry Ink",
+        "canonical": "oklch(55% 0.11 295)",
+        "tonalRamp": [
+          "oklch(15% 0.055 295)",
+          "oklch(25% 0.110 295)",
+          "oklch(35% 0.110 295)",
+          "oklch(45% 0.110 295)",
+          "oklch(55% 0.110 295)",
+          "oklch(65% 0.110 295)",
+          "oklch(80% 0.110 295)",
+          "oklch(95% 0.055 295)"
+        ]
+      },
+      "on-stamp": {
+        "role": "neutral",
+        "displayName": "Slip White (on ink)",
+        "canonical": "oklch(98% 0.003 265)",
+        "tonalRamp": [
+          "oklch(15% 0.002 265)",
+          "oklch(25% 0.003 265)",
+          "oklch(35% 0.003 265)",
+          "oklch(45% 0.003 265)",
+          "oklch(55% 0.003 265)",
+          "oklch(65% 0.003 265)",
+          "oklch(80% 0.003 265)",
+          "oklch(95% 0.002 265)"
+        ]
+      },
+      "print": {
+        "role": "secondary",
+        "displayName": "Printer's Red",
+        "canonical": "oklch(53% 0.21 22)",
+        "tonalRamp": [
+          "oklch(15% 0.105 22)",
+          "oklch(25% 0.210 22)",
+          "oklch(35% 0.210 22)",
+          "oklch(45% 0.210 22)",
+          "oklch(55% 0.210 22)",
+          "oklch(65% 0.210 22)",
+          "oklch(80% 0.210 22)",
+          "oklch(95% 0.105 22)"
+        ]
+      },
+      "rule": {
+        "role": "secondary",
+        "displayName": "Ruling Pink",
+        "canonical": "oklch(82% 0.06 5)",
+        "tonalRamp": [
+          "oklch(15% 0.030 5)",
+          "oklch(25% 0.060 5)",
+          "oklch(35% 0.060 5)",
+          "oklch(45% 0.060 5)",
+          "oklch(55% 0.060 5)",
+          "oklch(65% 0.060 5)",
+          "oklch(80% 0.060 5)",
+          "oklch(95% 0.030 5)"
+        ]
+      },
+      "error": {
+        "role": "neutral",
+        "displayName": "Warning Red",
+        "canonical": "oklch(48% 0.19 20)",
+        "tonalRamp": [
+          "oklch(15% 0.095 20)",
+          "oklch(25% 0.190 20)",
+          "oklch(35% 0.190 20)",
+          "oklch(45% 0.190 20)",
+          "oklch(55% 0.190 20)",
+          "oklch(65% 0.190 20)",
+          "oklch(80% 0.190 20)",
+          "oklch(95% 0.095 20)"
+        ]
+      },
+      "field-night": {
+        "role": "neutral",
+        "displayName": "Violet Ink Pad",
+        "canonical": "oklch(18% 0.05 295)",
+        "tonalRamp": [
+          "oklch(15% 0.025 295)",
+          "oklch(25% 0.050 295)",
+          "oklch(35% 0.050 295)",
+          "oklch(45% 0.050 295)",
+          "oklch(55% 0.050 295)",
+          "oklch(65% 0.050 295)",
+          "oklch(80% 0.050 295)",
+          "oklch(95% 0.025 295)"
+        ]
+      },
+      "field-ink-night": {
+        "role": "neutral",
+        "displayName": "Pale Lilac Ink (on field, night)",
+        "canonical": "oklch(95% 0.015 300)",
+        "tonalRamp": [
+          "oklch(15% 0.007 300)",
+          "oklch(25% 0.015 300)",
+          "oklch(35% 0.015 300)",
+          "oklch(45% 0.015 300)",
+          "oklch(55% 0.015 300)",
+          "oklch(65% 0.015 300)",
+          "oklch(80% 0.015 300)",
+          "oklch(95% 0.007 300)"
+        ]
+      },
+      "slip-night": {
+        "role": "neutral",
+        "displayName": "Night Slip",
+        "canonical": "oklch(23% 0.06 295)",
+        "tonalRamp": [
+          "oklch(15% 0.030 295)",
+          "oklch(25% 0.060 295)",
+          "oklch(35% 0.060 295)",
+          "oklch(45% 0.060 295)",
+          "oklch(55% 0.060 295)",
+          "oklch(65% 0.060 295)",
+          "oklch(80% 0.060 295)",
+          "oklch(95% 0.030 295)"
+        ]
+      },
+      "ink-night": {
+        "role": "neutral",
+        "displayName": "Pale Lilac Ink",
+        "canonical": "oklch(95% 0.015 300)",
+        "tonalRamp": [
+          "oklch(15% 0.007 300)",
+          "oklch(25% 0.015 300)",
+          "oklch(35% 0.015 300)",
+          "oklch(45% 0.015 300)",
+          "oklch(55% 0.015 300)",
+          "oklch(65% 0.015 300)",
+          "oklch(80% 0.015 300)",
+          "oklch(95% 0.007 300)"
+        ]
+      },
+      "muted-night": {
+        "role": "neutral",
+        "displayName": "Faded Lilac",
+        "canonical": "oklch(79% 0.04 295)",
+        "tonalRamp": [
+          "oklch(15% 0.020 295)",
+          "oklch(25% 0.040 295)",
+          "oklch(35% 0.040 295)",
+          "oklch(45% 0.040 295)",
+          "oklch(55% 0.040 295)",
+          "oklch(65% 0.040 295)",
+          "oklch(80% 0.040 295)",
+          "oklch(95% 0.020 295)"
+        ]
+      },
+      "stamp-night": {
+        "role": "primary",
+        "displayName": "Goldenrod Ink",
+        "canonical": "oklch(80% 0.165 85)",
+        "tonalRamp": [
+          "oklch(15% 0.083 85)",
+          "oklch(25% 0.165 85)",
+          "oklch(35% 0.165 85)",
+          "oklch(45% 0.165 85)",
+          "oklch(55% 0.165 85)",
+          "oklch(65% 0.165 85)",
+          "oklch(80% 0.165 85)",
+          "oklch(95% 0.083 85)"
+        ]
+      },
+      "stamp-hover-night": {
+        "role": "primary",
+        "displayName": "Fresh Goldenrod Ink",
+        "canonical": "oklch(86% 0.16 88)",
+        "tonalRamp": [
+          "oklch(15% 0.080 88)",
+          "oklch(25% 0.160 88)",
+          "oklch(35% 0.160 88)",
+          "oklch(45% 0.160 88)",
+          "oklch(55% 0.160 88)",
+          "oklch(65% 0.160 88)",
+          "oklch(80% 0.160 88)",
+          "oklch(95% 0.080 88)"
+        ]
+      },
+      "stamp-dry-night": {
+        "role": "primary",
+        "displayName": "Dry Goldenrod Ink",
+        "canonical": "oklch(68% 0.12 88)",
+        "tonalRamp": [
+          "oklch(15% 0.060 88)",
+          "oklch(25% 0.120 88)",
+          "oklch(35% 0.120 88)",
+          "oklch(45% 0.120 88)",
+          "oklch(55% 0.120 88)",
+          "oklch(65% 0.120 88)",
+          "oklch(80% 0.120 88)",
+          "oklch(95% 0.060 88)"
+        ]
+      },
+      "on-stamp-night": {
+        "role": "neutral",
+        "displayName": "Violet Ink Pad (on ink)",
+        "canonical": "oklch(18% 0.05 295)",
+        "tonalRamp": [
+          "oklch(15% 0.025 295)",
+          "oklch(25% 0.050 295)",
+          "oklch(35% 0.050 295)",
+          "oklch(45% 0.050 295)",
+          "oklch(55% 0.050 295)",
+          "oklch(65% 0.050 295)",
+          "oklch(80% 0.050 295)",
+          "oklch(95% 0.025 295)"
+        ]
+      },
+      "print-night": {
+        "role": "secondary",
+        "displayName": "Printer's Red (night)",
+        "canonical": "oklch(73% 0.16 10)",
+        "tonalRamp": [
+          "oklch(15% 0.080 10)",
+          "oklch(25% 0.160 10)",
+          "oklch(35% 0.160 10)",
+          "oklch(45% 0.160 10)",
+          "oklch(55% 0.160 10)",
+          "oklch(65% 0.160 10)",
+          "oklch(80% 0.160 10)",
+          "oklch(95% 0.080 10)"
+        ]
+      },
+      "rule-night": {
+        "role": "secondary",
+        "displayName": "Night Ruling",
+        "canonical": "oklch(35% 0.07 305)",
+        "tonalRamp": [
+          "oklch(15% 0.035 305)",
+          "oklch(25% 0.070 305)",
+          "oklch(35% 0.070 305)",
+          "oklch(45% 0.070 305)",
+          "oklch(55% 0.070 305)",
+          "oklch(65% 0.070 305)",
+          "oklch(80% 0.070 305)",
+          "oklch(95% 0.035 305)"
+        ]
+      },
+      "error-night": {
+        "role": "neutral",
+        "displayName": "Warning Pink",
+        "canonical": "oklch(79% 0.12 10)",
+        "tonalRamp": [
+          "oklch(15% 0.060 10)",
+          "oklch(25% 0.120 10)",
+          "oklch(35% 0.120 10)",
+          "oklch(45% 0.120 10)",
+          "oklch(55% 0.120 10)",
+          "oklch(65% 0.120 10)",
+          "oklch(80% 0.120 10)",
+          "oklch(95% 0.060 10)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The single H1 on the field."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section H2s on the field."
+      },
+      "printed": {
+        "displayName": "Printed",
+        "purpose": "Uppercase slip titles in Printer's Red."
+      },
+      "stamp-status": {
+        "displayName": "Stamp Status",
+        "purpose": "The live open/closed stamp; the largest type on the page."
+      },
+      "stamp-row": {
+        "displayName": "Stamp Row",
+        "purpose": "Stamped hours rows and event dates; today and the next event go 700 and larger."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Event titles and H3s."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All reading text, 65ch measure, tabular numerals."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Red uppercase form field names, legends and table heads; buttons at 1.375rem."
+      },
+      "typed": {
+        "displayName": "Typed",
+        "purpose": "Event tickets, input values and the Today tag."
+      }
+    },
+    "shadows": [
+      {
+        "name": "paper-on-card",
+        "value": "0 1px 2px rgb(92 58 0 / 0.2), 0 18px 40px -18px rgb(92 58 0 / 0.45)",
+        "purpose": "Slips and the photo plate resting on the field (light scheme)."
+      },
+      {
+        "name": "paper-on-card-night",
+        "value": "0 1px 2px rgb(0 0 0 / 0.4), 0 18px 40px -18px rgb(0 0 0 / 0.7)",
+        "purpose": "Same role in the dark scheme."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-press",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Stamp press and the accordion plus."
+      },
+      {
+        "name": "press",
+        "value": "480ms",
+        "purpose": "Stamp lands from 1.2x scale and 10% opacity; status on load, ISSUED on submit. Skipped under reduced motion."
+      },
+      {
+        "name": "button",
+        "value": "150ms",
+        "purpose": "Button background and 1px press translate."
+      },
+      {
+        "name": "disclosure",
+        "value": "200ms",
+        "purpose": "Accordion plus losing its upright."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "40rem"
+      },
+      {
+        "name": "md",
+        "value": "48rem"
+      },
+      {
+        "name": "lg",
+        "value": "60rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one button: a stamped violet label for the primary action.",
+      "html": "<button class=\"ds-button\">Apply for a card</button>",
+      "css": ".ds-button{display:inline-flex;align-items:center;min-height:3.25rem;padding:0.5rem 1.75rem;border:2px solid var(--stamp);border-radius:var(--radius,4px);background:var(--stamp);color:var(--on-stamp);font:700 1.375rem/1 var(--stamp-face);letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;cursor:pointer;transition:background-color 0.15s,transform 0.15s}.ds-button:hover{border-color:var(--stamp-hover);background:var(--stamp-hover)}.ds-button:active{transform:translateY(1px)}.ds-button:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
+    },
+    {
+      "name": "Slip",
+      "kind": "card",
+      "refersTo": "slip",
+      "description": "Paper card on the field with a red printed title.",
+      "html": "<section class=\"ds-slip\"><h2 class=\"ds-printed\">Opening hours</h2><p>Paper resting on card stock.</p></section>",
+      "css": ".ds-slip{padding:clamp(1.25rem,3vw,2.25rem);border:1px solid transparent;border-radius:var(--radius,4px);background:var(--slip);color:var(--ink);box-shadow:var(--shadow);font:1.125rem/1.6 var(--read)}.ds-printed{margin:0 0 1rem;color:var(--print);font:700 clamp(1.75rem,1.4rem + 1.2vw,2.5rem)/0.95 var(--stamp-face);letter-spacing:0.04em;text-transform:uppercase}"
+    },
+    {
+      "name": "Ruled Input",
+      "kind": "input",
+      "refersTo": "input-ruled",
+      "description": "A typed answer on a red ruled line, under a red printed field name.",
+      "html": "<div class=\"ds-field\"><label class=\"ds-label\" for=\"ds-name\">Full name</label><input class=\"ds-input\" id=\"ds-name\" type=\"text\"></div>",
+      "css": ".ds-field{display:grid;gap:0.5rem}.ds-label{color:var(--print);font:700 1.125rem/1.2 var(--stamp-face);letter-spacing:0.06em;text-transform:uppercase}.ds-input{width:100%;min-height:2.75rem;padding:0.375rem 0.25rem;border:0;border-bottom:2px solid var(--print);border-radius:0;background:transparent;color:var(--ink);font:1.1875rem var(--typed)}.ds-input[aria-invalid=\"true\"]{border-bottom:4px solid var(--error);background:color-mix(in srgb,var(--error) 8%,transparent)}.ds-input:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
+    },
+    {
+      "name": "Status Stamp",
+      "kind": "custom",
+      "refersTo": "status-stamp",
+      "description": "The live open/closed stamp, double-framed and tilted; red when closed.",
+      "html": "<p class=\"ds-status\"><span class=\"ds-status-date\">Sat, 3 Oct 2026</span><strong class=\"ds-status-head\">Open now</strong><span class=\"ds-status-detail\">until 5 pm</span></p>",
+      "css": ".ds-status{display:grid;justify-items:start;gap:0.15rem;width:fit-content;margin:0;padding:0.6rem 1rem 0.75rem;border:0.4rem double currentColor;border-radius:var(--radius,4px);color:var(--stamp);font-family:var(--stamp-face);font-weight:700;line-height:1;text-transform:uppercase;rotate:-3deg}.ds-status-date{font-size:1.125rem;letter-spacing:0.08em}.ds-status-head{font-size:clamp(3rem,2rem + 3.4vw,5.25rem);line-height:0.92}.ds-status-detail{font-size:clamp(1.375rem,1.1rem + 0.8vw,1.875rem);font-weight:600}"
+    },
+    {
+      "name": "Event Date Stamp",
+      "kind": "custom",
+      "refersTo": "event-stamp",
+      "description": "Framed day-month stamp; dry ink once the event has passed.",
+      "html": "<time class=\"ds-date-stamp\">10 Oct</time> <time class=\"ds-date-stamp ds-dry\">2 Oct</time>",
+      "css": ".ds-date-stamp{display:inline-block;padding:0.3rem 0.45rem;border:3px solid currentColor;border-radius:var(--radius,4px);color:var(--stamp);font:700 1.5rem/1 var(--stamp-face);text-transform:uppercase;text-align:center;rotate:-4deg}.ds-dry{color:var(--stamp-dry)}"
+    },
+    {
+      "name": "Tick Choice",
+      "kind": "input",
+      "description": "Drawn radio and checkbox; the mark is stamped in violet.",
+      "html": "<label class=\"ds-choice\"><input type=\"radio\" name=\"ds-c\" checked> Adult, 16 and over</label><label class=\"ds-choice\"><input type=\"checkbox\" checked> Email me the events list</label>",
+      "css": ".ds-choice{display:flex;align-items:center;gap:0.75rem;min-height:2.75rem;color:var(--ink);font:1.125rem/1.6 var(--read);cursor:pointer}.ds-choice input{display:grid;place-content:center;flex:none;width:1.5rem;height:1.5rem;margin:0;border:2px solid var(--ink);border-radius:50%;background:transparent;appearance:none;cursor:pointer}.ds-choice input[type=\"checkbox\"]{border-radius:var(--radius,4px)}.ds-choice input::before{content:\"\";width:0.75rem;height:0.75rem;border-radius:50%;background:var(--stamp);scale:0}.ds-choice input[type=\"checkbox\"]::before{width:0.875rem;height:0.875rem;border-radius:0;clip-path:polygon(12% 50%,0 64%,40% 100%,100% 18%,86% 4%,40% 72%)}.ds-choice input:checked::before{scale:1}.ds-choice input:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "description": "Plain ink links with the underline hidden until hover.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\">Opening hours</a><a href=\"#\">Events</a><a href=\"#\">Questions</a><a href=\"#\">Get a card</a></nav>",
+      "css": ".ds-nav{display:flex;flex-wrap:wrap;gap:0 1.5rem;font:1.0625rem/1.6 var(--read)}.ds-nav a{display:inline-block;padding-block:0.6rem;color:var(--field-ink);text-decoration-thickness:1px;text-underline-offset:0.2em;text-decoration-color:transparent}.ds-nav a:hover{text-decoration-color:currentColor}.ds-nav a:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
+    },
+    {
+      "name": "Pocket Question",
+      "kind": "custom",
+      "description": "Disclosure row with a drawn violet plus that loses its upright when open.",
+      "html": "<details class=\"ds-q\"><summary>Do I need a card to visit?</summary><p>No. Anyone can come in.</p></details>",
+      "css": ".ds-q{border-bottom:1px solid var(--rule);color:var(--ink);font:1.125rem/1.6 var(--read)}.ds-q summary{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;padding-block:1rem;font-weight:700;list-style:none;cursor:pointer}.ds-q summary::-webkit-details-marker{display:none}.ds-q summary::after{content:\"\";flex:none;width:1.125rem;height:1.125rem;margin-top:0.3rem;background:linear-gradient(var(--stamp) 0 0) center/100% 3px no-repeat,linear-gradient(var(--stamp) 0 0) center/3px 100% no-repeat;transition:background-size 0.2s cubic-bezier(0.16,1,0.3,1)}.ds-q[open] summary::after{background-size:100% 3px,3px 0}.ds-q p{margin:0;padding-bottom:1.25rem}.ds-q summary:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Date-Due Slip",
+    "overview": "The page is library stationery. A goldenrod card-stock field carries slip-white paper cards; the paper is printed in red (headings, field names, rules) and then stamped in violet ink (every date, time, status and action). Reading text is set in a high-legibility sans and stays out of the stamp vocabulary, so the stationery never costs comprehension.\n\nThe world has three materials and each has one job: the field is the desk, the slip is paper, ink is what the library did to the paper. Stamps are real, selectable text roughened by an SVG displacement filter and tilted a few degrees, never images. Freshness of ink encodes time: today and the next event are darker and larger, past rows and events are dry ink.\n\nAt night the materials swap rather than dim. The field becomes the violet ink pad, the slips go deep violet, and the ink turns goldenrod. Density is calm: one wide column of facts per slip, generous section padding, a 65ch reading measure.",
+    "keyCharacteristics": [
+      "Goldenrod field, slip-white paper, violet ink, red print.",
+      "Stamped type is condensed, uppercase, tilted and filter-roughened live text.",
+      "Ink freshness (fresh, wet, dry) marks today versus past.",
+      "A 12-column page axis whose column 6 is the date column.",
+      "One soft paper shadow; everything else is flat.",
+      "Dark scheme inverts field and ink instead of dimming."
+    ],
+    "rules": [
+      {
+        "name": "The Two Inks Rule",
+        "body": "Violet is what the library stamped or what you can press; red is what came printed on the stationery. Never set an action in red or a printed label in violet.",
+        "section": "colors"
+      },
+      {
+        "name": "The Night Swap Rule",
+        "body": "The dark scheme is the same world turned over: field becomes the violet pad and ink becomes goldenrod. Use the night tokens; never derive dark values by dimming the light ones.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fresh Ink Rule",
+        "body": "Freshness carries time. The current item gets fresh ink and the largest size, past items get dry ink, everything else gets the standard stamp.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Hands Rule",
+        "body": "Barlow is the printer and the stamp, Atkinson Next is the reader, Mono is the typist. Sentences are never set in Barlow, and stamps are never set in Atkinson.",
+        "section": "typography"
+      },
+      {
+        "name": "The Real Text Rule",
+        "body": "Stamps are live text with an SVG ink filter; the heavy speckled filter is for display-size stamps only, small stamps (row size and below) get the edge-only fine filter so speckle never costs legibility.",
+        "section": "typography"
+      },
+      {
+        "name": "The Date Column Rule",
+        "body": "On wide screens column 6 is the date column. Any new dated content aligns its stamp to it.",
+        "section": "layout"
+      },
+      {
+        "name": "The Paper Only Rule",
+        "body": "Shadow belongs to paper objects lying on the field. Controls, stamps and text never lift.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do stamp every date, time and status in violet Barlow uppercase as live text through the ink filter.",
+      "Do print slip titles, field names, table heads and rules in Printer's Red.",
+      "Do align new dated content to the column 6 date axis on wide screens.",
+      "Do use ink freshness (fresh, standard, dry) to show where today falls.",
+      "Do use the night tokens for dark mode so the field becomes the ink pad and ink turns goldenrod.",
+      "Do gate every motion (press, transitions, smooth scroll) behind prefers-reduced-motion and show the final state instantly otherwise.",
+      "Do keep every text and background pair at WCAG AA in both schemes."
+    ],
+    "donts": [
+      "Don't set reading sentences in Barlow Condensed or stamps in Atkinson.",
+      "Don't use the speckled ink filter on stamps at row size or smaller; use the fine filter.",
+      "Don't set actions in red or printed labels in violet.",
+      "Don't add shadows to anything that is not paper on the field.",
+      "Don't add small uppercase labels above headings; the only printed head is DATE DUE between double rules on the hours slip.",
+      "Don't replace live stamped text with images of stamps."
+    ]
+  }
+}

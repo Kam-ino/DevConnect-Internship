@@ -1,5 +1,6 @@
 import DueSlip from './DueSlip.jsx';
 import CardForm from './CardForm.jsx';
+import readingRoom from './assets/reading-room.jpg';
 
 const EVENTS = [
   {
@@ -139,7 +140,7 @@ export default function App() {
 
         <div className="visit-faq wrap axis">
           <section className="visit" aria-labelledby="visit-title">
-            <img className="plate" src="https://picsum.photos/id/192/1200/900" width="1200" height="900" loading="lazy"
+            <img className="plate" src={readingRoom} width="1200" height="900" loading="lazy"
               alt="People working at long tables in a reading room with floor-to-ceiling windows." />
             <h2 id="visit-title">Find us</h2>
             <address>418 Harbor Road, Wrenfield</address>

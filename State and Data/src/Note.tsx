@@ -134,7 +134,7 @@ function renderPanel({ rates, amount, from, to, onReload }: NoteProps): { panel:
         <span className="corner corner-br" aria-hidden="true">{to}</span>
         {/* The note's title line across the top, and its value in words across the bottom.
             Both repeat what the figures say, so they're hidden from assistive tech. */}
-        <p className="note-heading" aria-hidden="true"><span>{currencyName(from)} to {currencyName(to)}</span></p>
+        <p className="note-heading" aria-hidden="true">{currencyName(from)} to {currencyName(to)}</p>
         {/* The security ribbon runs the full height, woven behind the two printed lines */}
         <span className="ribbon" aria-hidden="true">
           {Array.from({ length: 24 }, (_, i) => <span key={i} className={i % 2 ? 'ribbon-alt' : undefined}>{i % 2 ? from : to}</span>)}
@@ -157,7 +157,7 @@ function renderPanel({ rates, amount, from, to, onReload }: NoteProps): { panel:
           <span className="ribbon-slot" aria-hidden="true" />
           <Seal code={to} />
         </div>
-        {words && <p className="note-words" aria-hidden="true"><span>{words}</span></p>}
+        {words && <p className="note-words" aria-hidden="true">{words}</p>}
         <Microprint />
       </section>
     ),

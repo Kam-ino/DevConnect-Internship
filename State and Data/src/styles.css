@@ -1,0 +1,610 @@
+/* Specimen: a currency converter printed like a banknote, after the US $100 note's system
+   (no portrait): mint paper, black engraving, green serials, colour-shift copper, a blue
+   security ribbon. Serial red is kept for errors. At night the note is under UV light:
+   green-black ground, flat fluorescent inks, no glow. */
+:root {
+  color-scheme: light dark;
+  --paper: #e6ebdf;
+  --note: #f1f4e9;
+  --band: #1f4a3c;
+  --on-band: #f3f6f1;
+  --ink: #1d2124;
+  --engrave: #2a2f33;
+  --muted: #495049;
+  --serial: #1d6b45;
+  --copper: #a3562a;
+  --ribbon: #34509f;
+  --rule: #c4ccbc;
+  --error: #b3261e;
+  --action: #1f4a3c;
+  --action-hover: #173a2f;
+  --on-action: #f3f6f1;
+  --chart: #a3562a; /* validated: OKLCH L in band, 3:1+ against the note, in both modes */
+  --tint: #e1e8da;
+  --sim: #e3e8f6;
+  --radius: 4px;
+  --shadow: 0 1px 2px rgb(31 74 60 / 0.12), 0 16px 36px -20px rgb(31 74 60 / 0.4);
+  --display: "Bodoni Moda Variable", "Bodoni 72", Didot, serif;
+  --ui: "Geist Variable", system-ui, sans-serif;
+  --mono: "Geist Mono Variable", ui-monospace, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0b1411;
+    --note: #121d19;
+    --band: #0f2c22;
+    --on-band: #e3efe8;
+    --ink: #e3efe8;
+    --engrave: #c9d6cf;
+    --muted: #a3b6ac;
+    --serial: #6ff0b3;
+    --copper: #e2a06c;
+    --ribbon: #8fa6ff;
+    --rule: #2a3a33;
+    --error: #ff8f86;
+    --action: #6ff0b3;
+    --action-hover: #9af5ca;
+    --on-action: #0b1411;
+    --chart: #c97f48;
+    --tint: #18261f;
+    --sim: #1a2140;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 16px 36px -20px rgb(0 0 0 / 0.8);
+  }
+}
+
+/* Base and browser surfaces */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  accent-color: var(--band);
+  caret-color: var(--ribbon);
+  scrollbar-color: var(--serial) var(--paper);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 1.0625rem/1.6 var(--ui);
+}
+
+::selection { background: var(--ribbon); color: var(--note); }
+
+h1, h2 { margin: 0 0 0.5em; line-height: 1.1; text-wrap: balance; }
+p { margin: 0 0 0.75em; max-width: 62ch; }
+
+a {
+  color: var(--serial);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible { outline: 3px solid var(--ribbon); outline-offset: 2px; }
+main:focus { outline: none; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  background: var(--note);
+  color: var(--ink);
+  font-weight: 600;
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+.wrap {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+}
+
+.figures { font-family: var(--mono); }
+
+/* Shell: the greenback band */
+.band {
+  background: var(--band);
+  color: var(--on-band);
+}
+.band-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+  padding-block: 0.9rem;
+}
+.brand {
+  color: inherit;
+  font: italic 600 1.625rem/1 var(--display);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+.band-status { margin: 0; font-size: 0.9375rem; }
+.band :focus-visible { outline-color: var(--on-band); }
+
+.simulation {
+  background: var(--sim);
+  border-bottom: 1px solid var(--rule);
+}
+.simulation p { margin-block: 0; padding-block: 0.6rem; font-size: 0.9375rem; max-width: none; }
+.simulation a { color: var(--ribbon); font-weight: 600; }
+
+main { padding-block: clamp(1.25rem, 2.5vw, 1.75rem) 3rem; }
+h1 { margin: 0; font: 600 clamp(2rem, 1.6rem + 1.4vw, 2.625rem)/1.05 var(--display); }
+
+/* Title row: the heading on the left, the reviewer's state links on the right */
+.title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+  margin-bottom: 1.25rem;
+}
+.states { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.75rem; }
+.states h2 { margin: 0; color: var(--muted); font: 600 0.9375rem/1.2 var(--ui); }
+.states ul { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
+.state-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.75rem;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--note);
+  color: var(--serial);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.state-link:hover { border-color: var(--serial); }
+
+/* Work area: the form on the left, the note on the right */
+.workspace {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (min-width: 56rem) {
+  .workspace { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 2rem; }
+}
+
+.converter {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--note);
+}
+
+.field { display: grid; gap: 0.4rem; }
+label { font-weight: 600; }
+
+input,
+select {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--note);
+  color: var(--ink);
+  font: inherit;
+}
+#amount { font: 500 1.5rem/1.2 var(--mono); letter-spacing: -0.01em; }
+input[aria-invalid="true"] { border-color: var(--error); border-width: 2px; }
+.error { margin: 0; color: var(--error); font-weight: 600; }
+.error:empty { display: none; }
+
+.pair { display: grid; gap: 0.75rem; }
+
+/* The swap sits on the axis between From and To */
+.swap {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 1rem;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--serial);
+  font: 600 0.9375rem var(--ui);
+  cursor: pointer;
+}
+.swap:hover { background: var(--tint); border-color: var(--serial); }
+.swap svg { width: 1.15em; height: 1.15em; }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.1rem;
+  border: 1.5px solid var(--action);
+  border-radius: var(--radius);
+  background: var(--action);
+  color: var(--on-action);
+  font: 600 1rem var(--ui);
+  cursor: pointer;
+}
+.button:hover { background: var(--action-hover); border-color: var(--action-hover); }
+.button-quiet { background: transparent; color: var(--serial); border-color: var(--rule); }
+.button-quiet:hover { background: var(--tint); border-color: var(--serial); }
+.button svg { width: 1.1em; height: 1.1em; }
+.button:active,
+.swap:active { transform: translateY(1px); }
+
+/* The note: a hatched lathe-work border between two engraved rules, like a banknote's frame */
+.note {
+  position: relative;
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+  min-height: 19rem;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+  border: 6px solid transparent;
+  border-image: repeating-linear-gradient(45deg, var(--engrave) 0 1px, transparent 1px 3.5px) 6;
+  outline: 1px solid var(--engrave);
+  background: var(--note);
+  box-shadow: inset 0 0 0 1px var(--engrave), var(--shadow);
+}
+@media (min-width: 36rem) {
+  .note { grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr); gap: 2rem; }
+}
+.note-body > :last-child { margin-bottom: 0; }
+.note-title { font: 600 clamp(1.5rem, 1.2rem + 1vw, 2rem)/1.1 var(--display); }
+.note-source { color: var(--muted); font-size: 0.875rem; }
+/* Dates set like banknote serial numbers: green, letter-spaced */
+.serial {
+  margin-left: 0.35rem;
+  color: var(--serial);
+  font: 600 0.875rem var(--mono);
+  letter-spacing: 0.18em;
+}
+
+/* Microprint along the bottom of the frame: decorative, the facts are printed in full above */
+.microprint {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.45rem;
+  left: 0.75rem;
+  overflow: hidden;
+  color: var(--engrave);
+  font: 500 4.5px/1 var(--mono);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* Result: laid out like the $100 note, without the portrait */
+.note.note-ready {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.85rem 1.25rem 1.6rem;
+}
+@media (min-width: 40rem) {
+  .note.note-ready { padding-inline: 2rem; }
+}
+
+/* Corner denominations: outlined engraved letters, the last in solid colour-shift copper */
+.corner {
+  position: absolute;
+  z-index: 1;
+  color: transparent;
+  font: 700 1.6rem/1 var(--display);
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: 1px var(--engrave);
+}
+.corner-tl { top: 0.75rem; left: 0.9rem; }
+.corner-tr { top: 0.75rem; right: 0.9rem; }
+.corner-bl { bottom: 1.1rem; left: 0.9rem; }
+.corner-br { right: 0.9rem; bottom: 1.1rem; color: var(--copper); -webkit-text-stroke: 0; }
+
+/* The two printed lines, as on the note: the title across the top (largest engraved capitals),
+   the value in words across the bottom between the lower corners. Both centred at every width.
+   Their paper backing lets the ribbon pass behind them, like a thread woven into the paper. */
+.note-heading,
+.note-words {
+  position: relative;
+  z-index: 1;
+  max-width: none;
+  margin: 0 4.5rem;
+  color: var(--engrave);
+  text-align: center;
+  text-transform: uppercase;
+}
+.note-heading span,
+.note-words span {
+  padding-inline: 0.4rem;
+  background: var(--note);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.note-heading { font: 700 clamp(1.05rem, 0.8rem + 0.8vw, 1.5rem)/1.35 var(--display); letter-spacing: 0.1em; }
+.note-words { margin-top: 0.4rem; font: 700 clamp(0.8rem, 0.7rem + 0.35vw, 1rem)/1.4 var(--display); letter-spacing: 0.12em; }
+
+.bill-face { position: relative; z-index: 1; display: grid; gap: 1.25rem; align-items: center; }
+.note-from { margin-bottom: 0.15rem; color: var(--muted); }
+.note-from .figures { font-family: var(--mono); }
+.note-amount {
+  margin-bottom: 0.4rem;
+  color: var(--copper);
+  font: 600 clamp(2.5rem, 1.6rem + 3.6vw, 4.5rem)/1 var(--display);
+  font-variant-numeric: lining-nums;
+  overflow-wrap: anywhere;
+}
+.note-code { font: 500 0.32em var(--mono); letter-spacing: 0.06em; vertical-align: 0.9em; }
+.note-rate { margin-bottom: 0.2rem; color: var(--serial); font: 600 1.0625rem/1.4 var(--mono); letter-spacing: 0.03em; }
+.note-ready .button-quiet { margin-top: 0.75rem; }
+
+/* The blue security ribbon and the seal, where the note has room for them.
+   The ribbon runs the note's full height, in the slot between the figures and the seal, and
+   carries the two codes as alternating motifs (solid and outlined), like the note's bells and 100s. */
+.ribbon,
+.ribbon-slot,
+.seal { display: none; }
+@media (min-width: 40rem) {
+  .bill-face { grid-template-columns: minmax(0, 1fr) 1.1rem 7.5rem; gap: 1.75rem; }
+  .ribbon-slot { display: block; }
+  .ribbon {
+    position: absolute;
+    top: 0;
+    right: calc(2rem + 7.5rem + 1.75rem);
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+    width: 1.1rem;
+    padding-block: 0.4rem;
+    overflow: hidden;
+    background: repeating-linear-gradient(0deg, rgb(255 255 255 / 0.1) 0 1px, transparent 1px 4px), var(--ribbon);
+    box-shadow: inset 1px 0 0 rgb(255 255 255 / 0.25), inset -1px 0 0 rgb(0 0 0 / 0.2);
+  }
+  .ribbon span {
+    flex: none;
+    color: var(--note);
+    font: 700 7px/1 var(--mono);
+    letter-spacing: 0.12em;
+    writing-mode: vertical-rl;
+  }
+  .ribbon .ribbon-alt { color: transparent; -webkit-text-stroke: 0.5px var(--note); }
+  .seal { display: block; width: 7.5rem; height: 7.5rem; }
+}
+.seal-teeth { fill: none; stroke: var(--serial); stroke-width: 1.1; }
+.seal-ring { fill: none; stroke: var(--serial); stroke-width: 0.8; }
+.seal-legend { fill: var(--serial); font: 700 6.2px var(--display); letter-spacing: 0.06em; }
+.seal-code { fill: var(--serial); font: 700 17px var(--display); }
+
+@media (max-width: 35.99rem) {
+  .corner { font-size: 1.25rem; }
+  .note-heading,
+  .note-words { margin-inline: 3.5rem; }
+}
+
+/* The rosette (loading and idle): generated guilloche, full-strength ink in three weights */
+.rosette {
+  display: block;
+  width: 100%;
+  max-width: 15rem;
+  height: auto;
+  margin-inline: auto;
+}
+.rosette-line { fill: none; }
+.layer-0 { stroke: var(--engrave); stroke-width: 0.55; }
+.layer-1 { stroke: var(--serial); stroke-width: 0.6; }
+.layer-2 { stroke: var(--copper); stroke-width: 0.75; }
+
+@media (max-width: 35.99rem) {
+  .rosette { max-width: 9rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .engrave-once .rosette-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: engrave 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .engrave-loop .rosette-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: engrave 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
+  }
+  .skeleton { animation: pulse 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate; }
+  .swap svg { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+  .swap:hover svg { transform: rotate(180deg); }
+  .chart svg { transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+}
+@keyframes engrave { to { stroke-dashoffset: 0; } }
+@keyframes pulse { to { opacity: 0.45; } }
+
+/* Loading: the rosette engraves itself; placeholders hold the result's place */
+.skeleton {
+  display: block;
+  height: 2.75rem;
+  max-width: 18rem;
+  margin-top: 1rem;
+  border-radius: var(--radius);
+  background: var(--tint);
+}
+.skeleton.short { height: 1rem; max-width: 11rem; margin-top: 0.75rem; }
+
+/* Empty: the unprinted watermark window of a note, because there is nothing to print */
+.watermark {
+  display: grid;
+  place-items: center;
+  width: min(100%, 12rem);
+  aspect-ratio: 3 / 4;
+  margin-inline: auto;
+  border: 1.5px dashed var(--muted);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, var(--note), var(--tint));
+}
+.watermark span { color: var(--muted); font: italic 600 1.25rem var(--display); }
+@media (max-width: 35.99rem) {
+  .watermark { width: 7rem; }
+}
+
+/* Error: a void note, framed in serial red, with nothing printed on it */
+/* The lathe-work band stays in black engraving; only the two rules turn red (a red hatch read as caution tape) */
+.note-error {
+  grid-template-columns: 1fr;
+  align-content: start;
+  gap: 0.25rem;
+  outline-color: var(--error);
+  box-shadow: inset 0 0 0 1px var(--error), var(--shadow);
+}
+.note-error .note-title { color: var(--error); }
+.note-error .button { justify-self: start; margin-top: 0.5rem; }
+/* A security-print overprint: type straight on the note, no box, level with the Try again button */
+.void-mark {
+  position: absolute;
+  right: 1.6rem;
+  bottom: 1.85rem;
+  color: var(--error);
+  font: 700 1.75rem/1 var(--display);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+/* Rate history: its own panel under the converter, across the full width */
+.history {
+  margin-top: 1.5rem;
+  padding: 1.25rem clamp(1rem, 3vw, 1.75rem) 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--note);
+}
+.history-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.history-head h2 { margin: 0; font: 600 1.5rem/1.15 var(--display); }
+.history-sub { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.9375rem; }
+.history-note { margin: 0.5rem 0 0; color: var(--muted); }
+
+/* Period switch: a segmented row of real radio buttons */
+.range { display: flex; margin: 0; padding: 0; border: 0; }
+.range-option { position: relative; }
+.range-option input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.range-option span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.8rem;
+  border: 1.5px solid var(--rule);
+  background: var(--note);
+  color: var(--muted);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+.range-option + .range-option span { margin-left: -1.5px; }
+.range-option:first-child span { border-radius: var(--radius) 0 0 var(--radius); }
+.range-option:last-child span { border-radius: 0 var(--radius) var(--radius) 0; }
+.range-option input:checked + span { position: relative; border-color: var(--serial); background: var(--tint); color: var(--ink); }
+.range-option input:focus-visible + span { position: relative; outline: 3px solid var(--ribbon); outline-offset: 2px; }
+
+/* The chart: engraved line work */
+.chart { position: relative; height: 200px; touch-action: pan-y; }
+.chart:focus-visible { outline: 3px solid var(--ribbon); outline-offset: 4px; }
+.chart svg { display: block; overflow: visible; }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .tick { fill: var(--muted); font: 11px var(--mono); }
+.chart .line { fill: none; stroke: var(--chart); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .hatch-line { stroke: var(--chart); stroke-width: 0.6; }
+.chart .opening { stroke: var(--muted); stroke-width: 1; }
+/* Halo in the note colour keeps the label legible where it crosses the line or the hatch */
+.chart .start-label {
+  fill: var(--muted);
+  font: 600 11px var(--mono);
+  paint-order: stroke;
+  stroke: var(--note);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.chart .marker { fill: var(--chart); stroke: var(--note); stroke-width: 2; }
+.chart .end-label { fill: var(--ink); font: 600 12px var(--mono); }
+.chart .crosshair { stroke: var(--muted); stroke-width: 1; }
+.chart.is-dimmed svg { opacity: 0.4; }
+
+.tooltip {
+  position: absolute;
+  top: 0.25rem;
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--note);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  transform: translateX(0.75rem);
+  white-space: nowrap;
+}
+.tooltip.is-flipped { transform: translateX(calc(-100% - 0.75rem)); }
+.tooltip strong { font: 600 0.9375rem var(--mono); }
+.tooltip span { color: var(--muted); font-size: 0.8125rem; }
+
+.chart-skeleton {
+  height: 200px;
+  border-radius: var(--radius);
+  background: repeating-linear-gradient(45deg, var(--rule) 0 1px, transparent 1px 6px);
+}
+
+/* Summary: three even columns at every width, so nothing is left on its own row */
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  gap: 0.5rem clamp(1.25rem, 4vw, 2.5rem);
+  margin: 0.75rem 0 0;
+}
+.history-stats dt { color: var(--muted); font-size: 0.8125rem; }
+.history-stats dd { margin: 0; font: 600 1rem var(--mono); }
+.history-stats dd span { display: block; color: var(--muted); font: 400 0.8125rem var(--ui); }
+
+.history-error { padding: 0.75rem 0 0.25rem; }
+.history-error strong:first-child { color: var(--error); }
+
+.history-table { margin-top: 0.75rem; }
+.history-table summary { width: fit-content; padding-block: 0.25rem; color: var(--serial); font-weight: 600; cursor: pointer; }
+.table-scroll { max-height: 14rem; margin-top: 0.5rem; overflow: auto; border: 1px solid var(--rule); border-radius: var(--radius); }
+.table-scroll:focus-visible { outline: 3px solid var(--ribbon); outline-offset: 2px; }
+.history-table table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.history-table th,
+.history-table td { padding: 0.35rem 0.75rem; border-bottom: 1px solid var(--rule); text-align: left; }
+.history-table thead th { position: sticky; top: 0; background: var(--note); color: var(--muted); font-weight: 600; }
+.history-table tbody th { font-weight: 400; }
+.history-table td { font-family: var(--mono); text-align: right; }
+
+.site-footer {
+  padding-block: 1.5rem 3rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.crash { margin: 2rem; font-weight: 600; }

@@ -4,6 +4,8 @@ import { formatDate, formatRate, niceScale, timeTicks, type RatePoint } from './
 const HEIGHT = 200;
 const PAD = { top: 14, right: 76, bottom: 28, left: 56 };
 const LABEL_WIDTH = 72; // room each date label needs on the x axis
+// The start label fits the 48px axis gutter; the exact rate is in the tooltip and the table
+const startFormat = new Intl.NumberFormat('en', { maximumSignificantDigits: 4 });
 
 function useWidth(ref: RefObject<HTMLElement | null>) {
   const [width, setWidth] = useState(0);
@@ -110,15 +112,20 @@ export default function RateChart({ points, from, to, dimmed = false }: RateChar
             {chart.ticks.map((tick) => (
               <g key={tick}>
                 <line className="grid" x1={PAD.left} x2={width - PAD.right} y1={chart.y(tick)} y2={chart.y(tick)} />
-                <text className="tick" x={PAD.left - 8} y={chart.y(tick)} dy="0.32em" textAnchor="end">{chart.tickFormat.format(tick)}</text>
+                {/* A tick label the start label would sit on gives way to it */}
+                {Math.abs(chart.y(tick) - chart.opening) > 16 && (
+                  <text className="tick" x={PAD.left - 8} y={chart.y(tick)} dy="0.32em" textAnchor="end">{chart.tickFormat.format(tick)}</text>
+                )}
               </g>
             ))}
             <path d={chart.area} fill={`url(#${hatchId})`} />
-            {/* The opening rate: the hatching runs from here to the line */}
+            {/* The opening rate: the hatching runs from here to the line. Its label lives in the axis
+                gutter, level with the hairline, so the series can never run through it. */}
             <line className="opening" x1={PAD.left} x2={width - PAD.right} y1={chart.opening} y2={chart.opening} />
             <path className="line" d={chart.line} />
-            <text className="start-label" x={PAD.left + 6} y={chart.opening} dy={chart.opening - PAD.top < 24 ? '1.15em' : '-0.55em'}>
-              Start {formatRate(points[0]!.rate)}
+            <text className="start-label" x={PAD.left - 8} y={chart.opening} textAnchor="end">
+              <tspan dy="-0.3em">Start</tspan>
+              <tspan x={PAD.left - 8} dy="1.15em">{startFormat.format(points[0]!.rate)}</tspan>
             </text>
             {chart.dates.map(({ index, label }) => (
               <g key={index}>

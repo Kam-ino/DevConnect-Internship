@@ -334,13 +334,10 @@ input[aria-invalid="true"] { border-color: var(--error); border-width: 2px; }
   text-align: center;
   text-transform: uppercase;
 }
-.note-heading span,
-.note-words span {
-  padding-inline: 0.4rem;
-  background: var(--note);
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
+/* Each printed line is a full-width paper band the ribbon passes under, so the ribbon's gaps
+   never depend on how long the text is */
+.note-heading,
+.note-words { background: var(--note); }
 .note-heading { font: 700 clamp(1.05rem, 0.8rem + 0.8vw, 1.5rem)/1.35 var(--display); letter-spacing: 0.1em; }
 .note-words { margin-top: 0.4rem; font: 700 clamp(0.8rem, 0.7rem + 0.35vw, 1rem)/1.4 var(--display); letter-spacing: 0.12em; }
 
@@ -538,15 +535,7 @@ input[aria-invalid="true"] { border-color: var(--error); border-width: 2px; }
 .chart .line { fill: none; stroke: var(--chart); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .chart .hatch-line { stroke: var(--chart); stroke-width: 0.6; }
 .chart .opening { stroke: var(--muted); stroke-width: 1; }
-/* Halo in the note colour keeps the label legible where it crosses the line or the hatch */
-.chart .start-label {
-  fill: var(--muted);
-  font: 600 11px var(--mono);
-  paint-order: stroke;
-  stroke: var(--note);
-  stroke-width: 4px;
-  stroke-linejoin: round;
-}
+.chart .start-label { fill: var(--muted); font: 600 11px var(--mono); }
 .chart .marker { fill: var(--chart); stroke: var(--note); stroke-width: 2; }
 .chart .end-label { fill: var(--ink); font: 600 12px var(--mono); }
 .chart .crosshair { stroke: var(--muted); stroke-width: 1; }

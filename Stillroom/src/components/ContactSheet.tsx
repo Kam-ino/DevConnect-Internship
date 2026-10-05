@@ -23,17 +23,25 @@ export default function ContactSheet({ video, sheets, frame, kept, range, onSele
   useEffect(() => {
     const cell = grid.current?.querySelector<HTMLButtonElement>(`[data-sample="${current}"]`);
     if (!cell) return;
-    if (grid.current?.contains(document.activeElement)) cell.focus({ preventScroll: true });
-    cell.scrollIntoView({ block: 'nearest' });
+    const box = grid.current;
+    if (!box) return;
+    if (box.contains(document.activeElement)) cell.focus({ preventScroll: true });
+    // Scroll the sheet only, never the page, so stepping doesn't move the inspector away.
+    const boxRect = box.getBoundingClientRect();
+    const cellRect = cell.getBoundingClientRect();
+    if (cellRect.top < boxRect.top) box.scrollTop -= boxRect.top - cellRect.top + 4;
+    else if (cellRect.bottom > boxRect.bottom) box.scrollTop += cellRect.bottom - boxRect.bottom + 4;
   }, [current]);
 
   const keptSamples = new Set([...kept].map((f) => sampleOf(f, step)));
+  // Mark the export range only when it's narrower than the whole clip; otherwise it says nothing.
+  const partial = range.start > 0 || range.end < video.frame_count - 1;
 
   return (
     <ol className="contact-sheet" ref={grid} aria-label={`Contact sheet: ${video.sample_count} frames${step > 1 ? `, every ${step}th` : ''}`}>
       {Array.from({ length: video.sample_count }, (_, sample) => {
         const at = sample * step;
-        const inRange = at >= range.start && at <= range.end;
+        const inRange = partial && at >= range.start && at <= range.end;
         const isCurrent = sample === current;
         return (
           <li key={sample} style={{ '--i': Math.min(sample, 80) } as CSSProperties}>

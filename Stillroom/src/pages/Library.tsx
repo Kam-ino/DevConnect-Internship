@@ -8,7 +8,7 @@ import { ApiError, request, uploadVideo, type Upload } from '../lib/api.ts';
 import { posterUrls } from '../lib/media.ts';
 import { Link } from '../lib/router.tsx';
 import Rail from '../components/Rail.tsx';
-import Thumb from '../components/Thumb.tsx';
+import Poster from '../components/Poster.tsx';
 import Scale from '../components/Scale.tsx';
 
 const ACCEPT = 'video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.webm,.mkv';
@@ -66,6 +66,17 @@ export default function Library({ sb, session }: { sb: SupabaseClient; session: 
   useEffect(() => () => upload.current?.abort(), []);
 
   const count = list.status === 'ready' ? list.videos.length : 0;
+  const full = count >= LIMITS.maxVideos;
+
+  // The rail's Upload button on another page links here with ?upload: once the list is known,
+  // open the file picker (or, when the library is full, let the full state say so).
+  const wantsPicker = useRef(new URLSearchParams(location.search).has('upload'));
+  useEffect(() => {
+    if (!wantsPicker.current || list.status !== 'ready') return;
+    wantsPicker.current = false;
+    history.replaceState(null, '', '/');
+    if (!full) picker.current?.click();
+  }, [list.status, full]);
 
   function start(file: File | undefined) {
     if (!file) return;
@@ -124,7 +135,7 @@ export default function Library({ sb, session }: { sb: SupabaseClient; session: 
 
   return (
     <div className="app">
-      <Rail sb={sb} session={session} current="library" onUpload={() => picker.current?.click()} />
+      <Rail sb={sb} session={session} current="library" onUpload={() => picker.current?.click()} uploadDisabled={full} />
       <main className="library" id="main">
         <header className="library-head">
           <h1>Library</h1>
@@ -149,11 +160,16 @@ export default function Library({ sb, session }: { sb: SupabaseClient; session: 
             start(e.target.files?.[0]);
             e.target.value = '';
           }} />
-          {sending.phase === 'idle' || sending.phase === 'failed' ? (
+          {full && sending.phase === 'idle' ? (
+            <>
+              <h2 id="upload-title">Your library is full</h2>
+              <p><span className="figures">{count}</span> of <span className="figures">{LIMITS.maxVideos}</span> videos. Delete a video to add another.</p>
+            </>
+          ) : sending.phase === 'idle' || sending.phase === 'failed' ? (
             <>
               <h2 id="upload-title">{count === 0 && list.status === 'ready' ? 'Your library is empty. Drop in your first video.' : 'Add a video'}</h2>
               <p>MP4, MOV, WebM or MKV · up to 50 MB · up to 5 minutes</p>
-              <button className="button button-chalk" type="button" onClick={() => picker.current?.click()}>
+              <button className="button button-chalk" type="button" onClick={() => picker.current?.click()} disabled={full}>
                 <UploadSimple size={20} aria-hidden="true" /> Choose a video
               </button>
               <p className="dropzone-hint">or drop it anywhere in this box</p>
@@ -203,9 +219,9 @@ export default function Library({ sb, session }: { sb: SupabaseClient; session: 
         {list.status === 'ready' && list.videos.length > 0 && (
           <ul className="plates" aria-label="Your videos">
             <AnimatePresence initial={false}>
-              {list.videos.map((video) => (
+              {list.videos.map((video, index) => (
                 <motion.li key={video.id} layout exit={{ opacity: 0, scale: 0.97 }} transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }} className="plate">
-                  <VideoPlate video={video} poster={posters[video.id]} onRetry={retry} onDelete={remove} />
+                  <VideoPlate sb={sb} plate={list.videos.length - index} video={video} poster={posters[video.id]} onRetry={retry} onDelete={remove} />
                 </motion.li>
               ))}
             </AnimatePresence>
@@ -216,8 +232,8 @@ export default function Library({ sb, session }: { sb: SupabaseClient; session: 
   );
 }
 
-function VideoPlate({ video, poster, onRetry, onDelete }: {
-  video: VideoRow; poster: string | undefined; onRetry: (v: VideoRow) => Promise<void>; onDelete: (v: VideoRow) => Promise<void>;
+function VideoPlate({ sb, plate, video, poster, onRetry, onDelete }: {
+  sb: SupabaseClient; plate: number; video: VideoRow; poster: string | undefined; onRetry: (v: VideoRow) => Promise<void>; onDelete: (v: VideoRow) => Promise<void>;
 }) {
   const [confirming, setConfirming] = useState(false);
   const [deleteError, setDeleteError] = useState('');
@@ -240,8 +256,8 @@ function VideoPlate({ video, poster, onRetry, onDelete }: {
   return (
     <article aria-labelledby={`title-${video.id}`}>
       <div className={`plate-image is-${failed ? 'failed' : video.status}`}>
-        {video.status === 'ready' && poster ? (
-          <Thumb video={video} sheets={[poster]} sample={0} className="plate-poster" />
+        {video.status === 'ready' ? (
+          <Poster sb={sb} video={video} sheet={poster} />
         ) : failed ? (
           <span className="void-mark" aria-hidden="true">Void</span>
         ) : (
@@ -250,6 +266,7 @@ function VideoPlate({ video, poster, onRetry, onDelete }: {
       </div>
       <div className="plate-caption">
         <h2 id={`title-${video.id}`}>
+          <span className="plate-no">Plate {plate}</span>{' '}
           {video.status === 'ready' ? <Link to={`/v/${video.id}`} className="plate-link">{video.title}</Link> : video.title}
         </h2>
         <p className="meta">{meta}</p>

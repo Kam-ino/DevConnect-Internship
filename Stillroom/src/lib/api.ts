@@ -23,6 +23,15 @@ export async function connect(): Promise<SupabaseClient> {
   } catch {
     throw new ApiError('Couldn’t reach the Stillroom server. Start it with npm run dev, then reload.', 0, 'network');
   }
+  // A web page instead of JSON means only the built files are being served (a static host, or
+  // `serve dist`), not the Stillroom server, so there is no API behind them.
+  if (res.ok && !(res.headers.get('Content-Type') ?? '').includes('application/json')) {
+    throw new ApiError(
+      'This address serves Stillroom’s pages but not its API: the Node server isn’t running. Start it with npm start (on Render, set the Start Command to npm start).',
+      res.status,
+      'no_api',
+    );
+  }
   const body = (await res.json().catch(() => null)) as { supabaseUrl?: string; supabaseAnonKey?: string; error?: { message?: string; code?: string } } | null;
   if (!res.ok || !body?.supabaseUrl || !body.supabaseAnonKey) {
     throw new ApiError(body?.error?.message ?? `The server answered ${res.status}.`, res.status, body?.error?.code ?? 'config');

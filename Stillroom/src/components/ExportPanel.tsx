@@ -131,21 +131,6 @@ export default function ExportPanel({ sb, video, frame, range, onRange, say }: E
         </label>
       )}
 
-      {checked.ok ? (
-        <p className="summary figures" aria-live="polite">
-          {count} frames · {outWidth}×{outHeight} · plays at {playback} fps
-        </p>
-      ) : (
-        <p className="form-error" role="alert">{checked.error}</p>
-      )}
-
-      <div className="export-actions">
-        <button className="button button-chalk" type="button" onClick={() => void run()} disabled={!checked.ok || busy}>
-          <DownloadSimple size={18} aria-hidden="true" /> {busy ? 'Extracting…' : 'Download ZIP'}
-        </button>
-        {busy && <button className="button button-quiet" type="button" onClick={() => controller.current?.abort()}>Cancel</button>}
-      </div>
-
       <details className="snippet">
         <summary>Play it on a website</summary>
         <pre><code>{SNIPPET}</code></pre>
@@ -153,6 +138,24 @@ export default function ExportPanel({ sb, video, frame, range, onRange, say }: E
           <Copy size={16} aria-hidden="true" /> Copy code
         </button>
       </details>
+
+      {/* The panel's one primary action: it stays in view at the bottom of the screen while any
+          part of the panel is on screen. */}
+      <div className="export-footer">
+        {checked.ok ? (
+          <p className="summary figures" aria-live="polite">
+            {count} frames · {outWidth}×{outHeight} · plays at {playback} fps
+          </p>
+        ) : (
+          <p className="form-error" role="alert">{checked.error}</p>
+        )}
+        <div className="export-actions">
+          <button className="button button-chalk" type="button" onClick={() => void run()} disabled={!checked.ok || busy}>
+            <DownloadSimple size={18} aria-hidden="true" /> {busy ? 'Extracting…' : 'Download ZIP'}
+          </button>
+          {busy && <button className="button button-quiet" type="button" onClick={() => controller.current?.abort()}>Cancel</button>}
+        </div>
+      </div>
     </section>
   );
 }

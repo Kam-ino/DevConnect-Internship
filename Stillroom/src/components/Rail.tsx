@@ -9,9 +9,10 @@ interface RailProps {
   session: Session;
   current: 'library' | 'workspace';
   onUpload?: () => void;
+  uploadDisabled?: boolean;
 }
 
-export default function Rail({ sb, session, current, onUpload }: RailProps) {
+export default function Rail({ sb, session, current, onUpload, uploadDisabled = false }: RailProps) {
   return (
     <nav className="rail" aria-label="Stillroom">
       <Link to="/" className="rail-home" aria-label="Stillroom, library">
@@ -26,7 +27,7 @@ export default function Rail({ sb, session, current, onUpload }: RailProps) {
         </li>
         {onUpload && (
           <li>
-            <button type="button" className="rail-item" onClick={onUpload}>
+            <button type="button" className="rail-item" onClick={onUpload} disabled={uploadDisabled} title={uploadDisabled ? 'Your library is full: delete a video to add another' : undefined}>
               <UploadSimple aria-hidden="true" size={22} />
               <span>Upload</span>
             </button>

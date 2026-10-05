@@ -8,7 +8,7 @@ import { LIMITS, clampFrame, formatDuration, timecode, type ImageFormat } from '
 import type { KeptFrame, VideoRow } from '../../shared/types.ts';
 import { ApiError, download } from '../lib/api.ts';
 import { useAssets } from '../lib/media.ts';
-import { Link } from '../lib/router.tsx';
+import { Link, navigate } from '../lib/router.tsx';
 import Rail from '../components/Rail.tsx';
 import Inspector from '../components/Inspector.tsx';
 import ContactSheet from '../components/ContactSheet.tsx';
@@ -56,6 +56,7 @@ export default function Workspace({ sb, session, videoId }: { sb: SupabaseClient
   const [attempt, setAttempt] = useState(0);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [announcement, setAnnouncement] = useState('');
+  const [plate, setPlate] = useState<number | null>(null);
   const noticeId = useRef(0);
   // The latest frame and kept list, readable before React re-renders, so key repeat never steps
   // from a stale frame; and the frames whose keep/un-keep is still saving.
@@ -83,6 +84,9 @@ export default function Workspace({ sb, session, videoId }: { sb: SupabaseClient
     frameRef.current = clampFrame(frameRef.current, row.frame_count);
     setFrame(frameRef.current);
     setRange((r) => (r.end ? r : { start: 0, end: Math.min(row.frame_count - 1, LIMITS.maxExportFrames - 1) }));
+    // Plates are numbered in upload order, like plates in a printed series.
+    const { count } = await sb.from('videos').select('id', { count: 'exact', head: true }).lt('created_at', row.created_at);
+    if (count !== null) setPlate(count + 1);
   }, [sb, videoId]);
 
   useEffect(() => {
@@ -222,7 +226,7 @@ export default function Workspace({ sb, session, videoId }: { sb: SupabaseClient
   // ---- Rendering ----
   const shell = (content: ReactNode) => (
     <div className="app">
-      <Rail sb={sb} session={session} current="workspace" />
+      <Rail sb={sb} session={session} current="workspace" onUpload={() => navigate("/?upload")} />
       <main className="workspace" id="main">{content}</main>
     </div>
   );
@@ -278,15 +282,15 @@ export default function Workspace({ sb, session, videoId }: { sb: SupabaseClient
 
   return (
     <div className="app">
-      <Rail sb={sb} session={session} current="workspace" />
+      <Rail sb={sb} session={session} current="workspace" onUpload={() => navigate("/?upload")} />
       <main className="workspace" id="main">
         <header className="caption-bar">
           <Link to="/" className="back"><ArrowLeft size={18} aria-hidden="true" /> Library</Link>
           <div className="caption">
-            <h1>{v.title}</h1>
+            <h1>{plate && <span className="plate-no">Plate {plate}</span>} {v.title}</h1>
             <p className="meta">{meta}</p>
           </div>
-          <div className="segmented on-stage" role="radiogroup" aria-label="View">
+          <div className="segmented" role="radiogroup" aria-label="View">
             <button type="button" role="radio" aria-checked={view === 'sheet'} onClick={() => switchView('sheet')}>Contact sheet</button>
             <button type="button" role="radio" aria-checked={view === 'rack'} onClick={() => switchView('rack')}>Plate rack</button>
           </div>
@@ -323,6 +327,7 @@ export default function Workspace({ sb, session, videoId }: { sb: SupabaseClient
                 </button>
                 <button className="chip" type="button" onClick={() => void downloadFrame(frame, 'png')}><DownloadSimple size={16} aria-hidden="true" /> PNG</button>
                 <button className="chip" type="button" onClick={() => void downloadFrame(frame, 'webp')}><DownloadSimple size={16} aria-hidden="true" /> WebP</button>
+                <span className="grid-tools">
                 <button className="icon-button" type="button" aria-pressed={grid > 0} onClick={() => setGrid((g) => (g ? 0 : divisions))} aria-label="Measuring grid (G)">
                   <GridFour size={20} aria-hidden="true" />
                 </button>
@@ -333,6 +338,7 @@ export default function Workspace({ sb, session, videoId }: { sb: SupabaseClient
                 }}>
                   {[4, 8, 10, 12, 16].map((n) => <option key={n} value={n}>{n} × {n}</option>)}
                 </select>
+                </span>
               </div>
             </div>
 

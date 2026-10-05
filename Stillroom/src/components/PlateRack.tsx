@@ -13,6 +13,9 @@ const GAP = 0.09; // space between plates, in plate heights
 const LEAN = 1.22; // how far a passed plate leans forward (radians)
 const LIFT = 0.16; // how far the current plate rises
 const DAMPING = 10; // larger settles faster
+const SHOWN_PASSED = 6; // passed plates fade out after this many, so they don't pile up in front
+const FILL = 0.58; // share of the canvas width the current plate fills
+const VIEW = new THREE.Vector3(0.42, 0.3, 1).normalize(); // the camera's three-quarter angle
 
 const vertexShader = /* glsl */ `
   attribute vec2 aCell;
@@ -44,6 +47,8 @@ const fragmentShader = /* glsl */ `
     float rim = mix(0.012, 0.03, vState.z);
     float onRim = 1.0 - step(rim, min(edge.x, edge.y));
     color = mix(color, uChalk, onRim * mix(0.28, 1.0, vState.z));
+    // a faint diagonal sheen, as light catches a glass negative
+    color += vec3(0.07) * smoothstep(0.3, 0.0, abs(vLocal.x * 0.8 - vLocal.y + 0.25)) * vState.y;
     if (vState.x > 0.5 && vLocal.x > 0.04 && vLocal.x < 0.2 && vLocal.y > 0.88 && vLocal.y < 0.97) color = uMount;
     gl_FragColor = vec4(color, 1.0);
     #include <colorspace_fragment>
@@ -145,12 +150,45 @@ export default function PlateRack({ video, sheets, frame, kept, onSelect }: Rack
       materials.push(material);
     }
 
+    // The glass itself: a thin slab behind every image, its faces shaded like lit glass edges.
+    const depth = plateH * 0.022;
+    const slabGeometry = new THREE.BoxGeometry(plateW, plateH, depth);
+    slabGeometry.translate(0, plateH / 2, -depth / 2 - 0.002);
+    // Faces: right, left, top, bottom, front, back. The front face sits just behind the image and is
+    // never drawn, so it can't fight the image for depth at grazing angles.
+    const slabMaterials = ['#4d4b42', '#4d4b42', '#8d887a', '#24231f', null, '#34332d'].map(
+      (color) => new THREE.MeshBasicMaterial(color ? { color } : { visible: false }),
+    );
+    const slabs = new THREE.InstancedMesh(slabGeometry, slabMaterials, total);
+    slabs.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    slabs.frustumCulled = false;
+    scene.add(slabs);
+
+    // The current plate's number, printed on its top edge (an HTML label kept over the 3D corner).
+    const label = document.createElement('span');
+    label.className = 'rack-label';
+    label.setAttribute('aria-hidden', 'true');
+    element.append(label);
+
     // ---- Layout: everything follows one damped position `p` ----
     let p = currentRef.current;
     let target = p;
     let hover = -1;
+    let distance = plateH * 3;
     const dummy = new THREE.Object3D();
+    const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
+    const targetMatrix = new THREE.Matrix4();
+    const corner = new THREE.Vector3();
+    const focus = new THREE.Vector3();
     const smooth = (t: number) => t * t * (3 - 2 * t);
+
+    // Back the camera off until the current plate fills FILL of the width and fits the height,
+    // whatever the canvas's aspect (a phone's tall canvas needs it further away).
+    function fit() {
+      const vertical = THREE.MathUtils.degToRad(camera.fov);
+      const horizontal = 2 * Math.atan(Math.tan(vertical / 2) * camera.aspect);
+      distance = Math.max(plateW / FILL / 2 / Math.tan(horizontal / 2), (plateH * 1.7) / 2 / Math.tan(vertical / 2));
+    }
 
     function layout() {
       for (const [m, mesh] of meshes.entries()) {
@@ -159,21 +197,38 @@ export default function PlateRack({ video, sheets, frame, kept, onSelect }: Rack
         for (let k = 0; k < mesh.count; k++) {
           const i = offset + k;
           const d = i - p;
+          if (d < -SHOWN_PASSED - 1) {
+            mesh.setMatrixAt(k, hidden);
+            slabs.setMatrixAt(i, hidden);
+            continue;
+          }
           const passed = smooth(Math.min(1, Math.max(0, -d)));
           const near = Math.max(0, 1 - Math.abs(d));
           dummy.position.set(0, LIFT * plateH * near - passed * 0.02, -i * GAP * plateH + passed * GAP * plateH * 0.6);
           dummy.rotation.set(-LEAN * passed + (d > 0 ? 0.1 * Math.min(1, d) : 0), 0, 0);
           dummy.updateMatrix();
           mesh.setMatrixAt(k, dummy.matrix);
-          const brightness = d < 0 ? 0.12 + 0.6 * (1 - passed) : Math.max(0.15, 1 - Math.max(0, d - 1) * 0.07);
+          slabs.setMatrixAt(i, dummy.matrix);
+          if (i === target) targetMatrix.copy(dummy.matrix);
+          const fade = Math.min(1, Math.max(0, (d + SHOWN_PASSED + 1) / 2)); // last passed plates fade out
+          const brightness = (d < 0 ? 0.34 + 0.4 * (1 - passed) : Math.max(0.15, 1 - Math.max(0, d - 1) * 0.07)) * fade;
           state.setXYZ(k, keptSamples.has(i) ? 1 : 0, i === hover ? Math.min(1, brightness + 0.25) : brightness, near);
         }
         mesh.instanceMatrix.needsUpdate = true;
         state.needsUpdate = true;
       }
+      slabs.instanceMatrix.needsUpdate = true;
+
       const z = -p * GAP * plateH;
-      camera.position.set(plateW * 0.75, plateH * 1.45, z + plateH * 3.1);
-      camera.lookAt(plateW * 0.05, plateH * 0.5, z - plateH * 0.6);
+      focus.set(plateW * 0.12, plateH * 0.62, z - plateH * 0.25);
+      camera.position.copy(focus).addScaledVector(VIEW, distance);
+      camera.lookAt(focus);
+      camera.updateMatrixWorld();
+
+      // Pin the label to the target plate's top-left corner.
+      corner.set(-plateW / 2, plateH, 0).applyMatrix4(targetMatrix).project(camera);
+      const rect = renderer.domElement.getBoundingClientRect();
+      label.style.transform = `translate(${((corner.x + 1) / 2) * rect.width}px, ${((1 - corner.y) / 2) * rect.height}px) translateY(calc(-100% - 6px))`;
     }
 
     // ---- Render loop: runs only while something is moving ----
@@ -200,7 +255,9 @@ export default function PlateRack({ video, sheets, frame, kept, onSelect }: Rack
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      wake();
+      fit();
+      layout();
+      renderer.render(scene, camera);
     });
     resize.observe(element);
 
@@ -224,6 +281,9 @@ export default function PlateRack({ video, sheets, frame, kept, onSelect }: Rack
 
     let wheel = 0;
     const onWheel = (event: WheelEvent) => {
+      // At the first or last plate the wheel scrolls the page again, so the rack never traps it.
+      const direction = Math.sign(event.deltaY);
+      if ((direction < 0 && currentRef.current === 0) || (direction > 0 && currentRef.current === total - 1)) return;
       event.preventDefault();
       wheel += event.deltaY;
       while (Math.abs(wheel) >= 60) {
@@ -273,9 +333,15 @@ export default function PlateRack({ video, sheets, frame, kept, onSelect }: Rack
     canvas.addEventListener('pointerup', onUp);
     canvas.addEventListener('pointerleave', onLeave);
 
+    const name = (sample: number) => {
+      label.textContent = `Plate ${sample + 1} · frame ${sample * video.sample_step}`;
+    };
+    name(target);
+
     rack.current = {
       setTarget(sample) {
         target = sample;
+        name(sample);
         wake();
       },
       setKept(samples) {
@@ -296,6 +362,9 @@ export default function PlateRack({ video, sheets, frame, kept, onSelect }: Rack
       canvas.removeEventListener('pointerup', onUp);
       canvas.removeEventListener('pointerleave', onLeave);
       meshes.forEach((mesh) => mesh.geometry.dispose());
+      slabGeometry.dispose();
+      slabMaterials.forEach((material) => material.dispose());
+      label.remove();
       geometry.dispose();
       materials.forEach((material) => material.dispose());
       textures.forEach((texture) => texture.dispose());

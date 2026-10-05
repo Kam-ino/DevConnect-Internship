@@ -84,7 +84,7 @@ function HistoryBody({ history, from, to, period, onRetry }: Omit<HistoryProps, 
       <dl className="history-stats">
         <div>
           <dt>Change</dt>
-          <dd>{formatChange(change)}</dd>
+          <dd>{formatChange(change)} <span>from {formatRate(points[0]!.rate)}</span></dd>
         </div>
         <div>
           <dt>High</dt>

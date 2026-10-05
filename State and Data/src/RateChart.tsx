@@ -113,19 +113,19 @@ export default function RateChart({ points, from, to, dimmed = false }: RateChar
               <g key={tick}>
                 <line className="grid" x1={PAD.left} x2={width - PAD.right} y1={chart.y(tick)} y2={chart.y(tick)} />
                 {/* A tick label the start label would sit on gives way to it */}
-                {Math.abs(chart.y(tick) - chart.opening) > 16 && (
+                {Math.abs(chart.y(tick) - chart.opening) > 13 && (
                   <text className="tick" x={PAD.left - 8} y={chart.y(tick)} dy="0.32em" textAnchor="end">{chart.tickFormat.format(tick)}</text>
                 )}
               </g>
             ))}
             <path d={chart.area} fill={`url(#${hatchId})`} />
-            {/* The opening rate: the hatching runs from here to the line. Its label lives in the axis
-                gutter, level with the hairline, so the series can never run through it. */}
+            {/* The opening rate: the hatching runs from here to the line. A hollow marker starts the line
+                and its value sits in the axis gutter, level with the hairline, so the series never crosses it. */}
             <line className="opening" x1={PAD.left} x2={width - PAD.right} y1={chart.opening} y2={chart.opening} />
             <path className="line" d={chart.line} />
-            <text className="start-label" x={PAD.left - 8} y={chart.opening} textAnchor="end">
-              <tspan dy="-0.3em">Start</tspan>
-              <tspan x={PAD.left - 8} dy="1.15em">{startFormat.format(points[0]!.rate)}</tspan>
+            <circle className="start-marker" cx={PAD.left} cy={chart.opening} r="3.5" />
+            <text className="start-label" x={PAD.left - 8} y={chart.opening} dy="0.32em" textAnchor="end">
+              {startFormat.format(points[0]!.rate)}
             </text>
             {chart.dates.map(({ index, label }) => (
               <g key={index}>

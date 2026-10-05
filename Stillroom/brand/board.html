@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Stillroom brand board</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-stretch: 62% 125%; src: url('../node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; src: url('../node_modules/@fontsource-variable/hanken-grotesk/files/hanken-grotesk-latin-wght-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Azeret Mono'; font-weight: 100 900; src: url('../node_modules/@fontsource-variable/azeret-mono/files/azeret-mono-latin-wght-normal.woff2') format('woff2'); }
+  :root {
+    --canvas: #0a0a09; --stage: #121211; --stage-2: #1a1a18; --rule: #34332d; --rule-strong: #4d4b42;
+    --chalk: #ece7da; --chalk-2: #b0aa9b; --chalk-3: #8d887a;
+    --mount: #d3c9b0; --mount-3: #e6dfcb; --mount-ink: #1b1915; --mount-ink-2: #4c4535;
+    --sepia: #b08a5f; --error: #ff7056;
+    --display: 'Archivo', sans-serif; --sans: 'Hanken Grotesk', sans-serif; --mono: 'Azeret Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { background: var(--canvas); }
+  body { width: 1920px; height: 1200px; padding: 28px; font-family: var(--sans); color: var(--chalk); }
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 22px; height: 100%; }
+  .panel { position: relative; overflow: hidden; background: var(--stage); padding: 30px 32px; display: flex; flex-direction: column; }
+  .panel.mount { background: var(--mount); color: var(--mount-ink); }
+  .label { position: absolute; left: 32px; bottom: 22px; right: 32px; display: flex; justify-content: space-between; font: 500 11px/1 var(--mono); letter-spacing: 0.04em; color: var(--chalk-3); text-transform: uppercase; }
+  .mount .label { color: var(--mount-ink-2); }
+  svg { display: block; }
+
+  /* 1 cover */
+  .cover { justify-content: center; align-items: center; gap: 22px; }
+  .cover .word { font: 700 84px/1 var(--display); font-stretch: 72%; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* 2 construction */
+  .construction { align-items: center; justify-content: center; }
+
+  /* 3 digital */
+  .browser { flex: 1; min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--rule-strong); background: #0d0d0c; margin-bottom: 30px; }
+  .browser-bar { display: flex; align-items: center; gap: 12px; height: 34px; padding: 0 12px; border-bottom: 1px solid var(--rule); }
+  .browser-bar i { width: 9px; height: 9px; border: 1px solid var(--rule-strong); border-radius: 50%; }
+  .url { flex: 1; margin-left: 10px; height: 20px; padding: 0 10px; display: flex; align-items: center; gap: 8px; background: var(--stage-2); font: 400 11px var(--mono); color: var(--chalk-2); }
+  .browser img { flex: 1; width: 100%; height: 0; min-height: 0; object-fit: cover; object-position: left top; }
+
+  /* 4 essence */
+  .essence { justify-content: center; }
+  .essence h1 { font: 700 92px/0.92 var(--display); font-stretch: 72%; letter-spacing: 0.01em; text-transform: uppercase; }
+  .essence p { margin-top: 22px; font: 400 15px/1.5 var(--sans); color: var(--chalk-2); max-width: 34ch; }
+
+  /* 5 colour */
+  .swatches { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 12px; flex: 1; margin-bottom: 30px; }
+  .swatch { display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; border: 1px solid var(--rule); font: 500 11px/1.45 var(--mono); }
+  .swatch b { font: 600 13px/1.2 var(--sans); }
+
+  /* 6 type */
+  .type { gap: 6px; }
+  .type .aa { font: 700 128px/0.9 var(--display); font-stretch: 72%; margin: 6px 0 10px; }
+  .type .row { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-top: 1px solid rgba(27,25,21,0.25); }
+  .type .row span:last-child { font: 400 11px var(--mono); color: var(--mount-ink-2); }
+  .s1 { font: 600 26px var(--display); font-stretch: 85%; } .s2 { font: 500 19px var(--sans); } .s3 { font: 500 16px var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* 7 print */
+  .print-wrap { flex: 1; display: grid; place-items: center; background: #0d0d0c; margin: -30px -32px 16px; }
+  .label { z-index: 2; }
+  .print { width: 400px; padding: 18px 18px 14px; background: var(--mount); color: var(--mount-ink); box-shadow: 0 18px 40px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4); transform: rotate(-2.2deg); }
+  .print-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; font: 600 13px var(--display); font-stretch: 85%; }
+  .print-head b { font: 700 16px var(--display); font-stretch: 72%; text-transform: uppercase; letter-spacing: 0.04em; }
+  .print-foot { display: flex; justify-content: space-between; margin-top: 10px; font: 400 9px var(--mono); color: var(--mount-ink-2); }
+
+  /* 8 image */
+  .image { padding: 0; }
+  .image .study { flex: 1; display: grid; place-items: center; padding: 26px 30px 50px; }
+
+  /* 9 system */
+  .system { gap: 16px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; font: 600 13px var(--sans); border: 1px solid transparent; border-radius: 2px; }
+  .btn.chalk { background: var(--chalk); color: var(--stage); }
+  .btn.mountb { background: var(--mount); color: var(--mount-ink); }
+  .chip { display: inline-flex; align-items: center; height: 30px; padding: 0 10px; border: 1px solid var(--rule-strong); border-radius: 2px; font: 500 12px var(--mono); }
+  kbd { display: inline-block; min-width: 26px; padding: 3px 6px; border: 1px solid var(--rule-strong); border-radius: 2px; background: #24231f; font: 500 12px var(--mono); text-align: center; }
+  .scale { height: 12px; position: relative; background: repeating-linear-gradient(90deg, var(--rule-strong) 0 1px, transparent 1px 10%) 0 100% / 100% 5px no-repeat, #24231f; }
+  .scale span { position: absolute; inset: 0; right: 38%; background: var(--chalk); }
+  .cells { display: flex; gap: 8px; }
+  .cell { position: relative; width: 92px; padding: 3px; border: 1px solid transparent; font: 500 10px var(--mono); color: var(--chalk-2); }
+  .cell .t { height: 52px; margin-bottom: 4px; background: radial-gradient(circle at var(--x, 40%) var(--y, 45%), #ece7da 0 5px, transparent 5.5px), repeating-linear-gradient(90deg, rgba(236,231,218,0.16) 0 1px, transparent 1px 10%), #050505; }
+  .cell.current { background: var(--chalk); color: var(--stage); }
+  .cell.kept::before { content: ''; position: absolute; top: -1px; left: 8px; width: 20px; height: 7px; background: var(--mount); }
+  .cell.range span { box-shadow: 0 2px 0 var(--sepia); }
+  .readout { font: 500 15px var(--mono); }
+  .readout em { font-style: normal; color: var(--chalk-2); margin-left: 12px; }
+</style>
+</head>
+<body>
+<main class="board">
+
+  <section class="panel mount cover">
+    <svg width="150" height="150" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="#1b1915" stroke-width="1.6"><rect x="5" y="5" width="22" height="22"/><path d="M12.33 2.5v27M19.67 2.5v27M2.5 12.33h27M2.5 19.67h27"/></g><rect x="19.67" y="12.33" width="7.33" height="7.34" fill="#1b1915"/></svg>
+    <div class="word">Stillroom</div>
+    <div class="label"><span>Brand system</span><span>01</span></div>
+  </section>
+
+  <section class="panel construction">
+    <svg width="500" height="290" viewBox="-6 -6 70 40" aria-hidden="true" font-family="Azeret Mono" font-size="1.5">
+      <g stroke="#34332d" stroke-width="0.12"><path d="M-12 0H44M-12 32H44M0 -6V36M32 -6V36"/></g>
+      <g fill="none" stroke="#ece7da" stroke-width="0.6"><rect x="5" y="5" width="22" height="22"/><path d="M12.33 2.5v27M19.67 2.5v27M2.5 12.33h27M2.5 19.67h27"/></g>
+      <rect x="19.67" y="12.33" width="7.33" height="7.34" fill="#ece7da"/>
+      <g stroke="#b08a5f" stroke-width="0.15" fill="#b08a5f">
+        <path d="M5 30.5H27M5 29.8v1.4M27 29.8v1.4" /><text x="13.5" y="33.2" stroke="none">22 · the plate</text>
+        <path d="M33 5V12.33M32.3 5H33.7M32.3 12.33H33.7" /><text x="34.4" y="9.3" stroke="none">⅓ rules</text>
+        <path d="M27 2.5H29.5" /><text x="34.4" y="3.2" stroke="none">2.5 overshoot</text>
+        <path d="M27 16H33" /><text x="34.4" y="16.6" stroke="none">the held frame</text>
+      </g>
+    </svg>
+    <div class="label"><span>Construction · plate, measured rules, one held frame</span><span>02</span></div>
+  </section>
+
+  <section class="panel">
+    <div class="browser">
+      <div class="browser-bar"><i></i><i></i><i></i><div class="url">stillroom.onrender.com</div></div>
+      <img src="assets/app-signin.png" alt="" />
+    </div>
+    <div class="label"><span>Digital · the sign-in screen</span><span>03</span></div>
+  </section>
+
+  <section class="panel essence">
+    <h1>Motion,<br />held still.</h1>
+    <p>Every frame of a video, numbered and exact. Nothing generated, nothing upscaled.</p>
+    <div class="label"><span>Essence</span><span>04</span></div>
+  </section>
+
+  <section class="panel">
+    <div class="swatches">
+      <div class="swatch" style="background:#121211;color:#ece7da"><b>Stage</b>#121211<br/>the backdrop</div>
+      <div class="swatch" style="background:#ece7da;color:#121211"><b>Chalk</b>#ECE7DA<br/>grid, text, live</div>
+      <div class="swatch" style="background:#d3c9b0;color:#1b1915"><b>Mount</b>#D3C9B0<br/>the shell, kept</div>
+      <div class="swatch" style="background:#1b1915;color:#e6dfcb"><b>Mount ink</b>#1B1915<br/>type on buff</div>
+      <div class="swatch" style="background:#b08a5f;color:#121211"><b>Albumen</b>#B08A5F<br/>export range</div>
+      <div class="swatch" style="background:#ff7056;color:#1c0904"><b>Vermilion</b>#FF7056<br/>errors only</div>
+    </div>
+    <div class="label"><span>Colour · one job per ink</span><span>05</span></div>
+  </section>
+
+  <section class="panel mount type">
+    <div class="aa">Aa</div>
+    <div class="row"><span class="s1">Plate 3 · gallop.mp4</span><span>Archivo Condensed · headings</span></div>
+    <div class="row"><span class="s2">Keep frame · Download ZIP</span><span>Hanken Grotesk · interface</span></div>
+    <div class="row"><span class="s3">00:00:05:03 · 0123</span><span>Azeret Mono · figures</span></div>
+    <div class="label"><span>Typography</span><span>06</span></div>
+  </section>
+
+  <section class="panel">
+    <div class="print-wrap">
+      <div class="print">
+        <div class="print-head"><b>Plate 3</b><span>Bouncing ball · frames 0–11</span></div>
+        <svg id="print-frames" width="364" height="200" viewBox="0 0 384 210" aria-hidden="true"></svg>
+        <div class="print-foot"><span>Stillroom · 12 fps · 1920 × 1080</span><span>Synthetic study</span></div>
+      </div>
+    </div>
+    <div class="label"><span>Print · a mounted contact print</span><span>07</span></div>
+  </section>
+
+  <section class="panel image">
+    <div class="study"><svg id="study" width="540" height="270" viewBox="0 0 540 270" aria-hidden="true"></svg></div>
+    <div class="label"><span>Imagery · motion read against a measured grid</span><span>08</span></div>
+  </section>
+
+  <section class="panel system">
+    <div class="readout">00:00:05:03<em>5.125 s</em></div>
+    <div class="chips"><span class="btn chalk">Keep frame</span><span class="btn mountb">Kept</span><span class="chip">PNG</span><span class="chip">WebP</span><span class="chip">Use frame 123</span></div>
+    <div class="cells">
+      <div class="cell range"><div class="t" style="--x:30%;--y:62%"></div><span>120</span></div>
+      <div class="cell kept range"><div class="t" style="--x:44%;--y:40%"></div><span>121</span></div>
+      <div class="cell current range"><div class="t" style="--x:58%;--y:30%"></div><span>122</span></div>
+      <div class="cell"><div class="t" style="--x:72%;--y:42%"></div><span>123</span></div>
+    </div>
+    <div class="scale"><span></span></div>
+    <div class="chips"><kbd>←</kbd><kbd>→</kbd><kbd>K</kbd><kbd>G</kbd><kbd>I</kbd><kbd>O</kbd></div>
+    <div class="label"><span>System · live state in chalk, kept in buff</span><span>09</span></div>
+  </section>
+</main>
+
+<script>
+  // Synthetic bouncing-ball frames (the same study the sign-in screen draws).
+  function ball(i, n, w, h) {
+    const t = i / (n - 1);
+    const height = Math.abs(Math.sin(t * Math.PI * 1.5)) * (1 - t * 0.45);
+    const ground = h - h * 0.18;
+    return { x: w * 0.12 + t * w * 0.76, y: ground - height * h * 0.6, ground, squash: height < 0.08 ? 1.35 : 1 };
+  }
+  function frames(svg, cols, rows, w, h, gap, mount, labels) {
+    const ns = 'http://www.w3.org/2000/svg';
+    const n = cols * rows;
+    for (let i = 0; i < n; i++) {
+      const g = document.createElementNS(ns, 'g');
+      const ox = (i % cols) * (w + gap), oy = Math.floor(i / cols) * (h + gap + (labels ? 12 : 0));
+      g.setAttribute('transform', `translate(${ox} ${oy})`);
+      const r = (w / 160) * 9;
+      const b = ball(i, n, w, h);
+      let html = `<rect width="${w}" height="${h}" fill="${mount ? '#0d0d0c' : '#0a0a09'}" stroke="#4d4b42" stroke-width="0.8"/>`;
+      for (let k = 1; k < 10; k++) html += `<line x1="${k * w / 10}" x2="${k * w / 10}" y1="0" y2="${h}" stroke="#ece7da" stroke-opacity="0.18" stroke-width="0.5"/>`;
+      for (let k = 1; k < 6; k++) html += `<line y1="${k * h / 6}" y2="${k * h / 6}" x1="0" x2="${w}" stroke="#ece7da" stroke-opacity="0.18" stroke-width="0.5"/>`;
+      html += `<ellipse cx="${b.x}" cy="${b.ground + r * 0.7}" rx="${r * 1.1}" ry="${r * 0.25}" fill="#ece7da" opacity="0.22"/>`;
+      html += `<ellipse cx="${b.x}" cy="${b.y}" rx="${r * b.squash}" ry="${r / b.squash}" fill="#ece7da"/>`;
+      if (i === 6 && !mount) html += `<rect x="-3" y="-3" width="${w + 6}" height="${h + 6}" fill="none" stroke="#ece7da" stroke-width="2.4"/>`;
+      if (labels) html += `<text x="0" y="${h + 10}" font-family="Azeret Mono" font-size="8.5" fill="${mount ? '#4c4535' : '#b0aa9b'}">${String(i).padStart(4, '0')}</text>`;
+      g.innerHTML = html;
+      svg.append(g);
+    }
+  }
+  frames(document.getElementById('print-frames'), 4, 3, 90, 54, 8, true, true);
+  frames(document.getElementById('study'), 4, 3, 126, 70, 12, false, true);
+</script>
+</body>
+</html>

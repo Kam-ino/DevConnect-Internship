@@ -76,7 +76,7 @@ Shown under every converted result for a pair the ECB covers.
 - **Summary:** the change over the period, plus the high and low with their dates.
 - **Table view:** "Show the numbers" opens every day's rate as a table, so nothing is only in the picture.
 - **Its own states:** a hatched placeholder on first load. When you switch period, the old line stays on screen, faded, until the new one arrives (no flash). If the request fails, a message says what failed and what to do, with Try again: open `/?simulate=chart-error`, or go offline in DevTools and switch period. A pair with no daily data says "No history for this pair". Pairs with no ECB rate, and same-currency pairs, show no chart.
-- **Honest fill:** the hatching runs between the line and the period's opening rate, so it shows the change. The y-axis has round bounds that always contain every point.
+- **Honest fill:** the hatching runs between the line and the period's opening rate (the hairline, starting at a hollow dot, with its value in the axis margin), so it shows the change. The y-axis has round bounds that always contain every point.
 
 ## How it works
 

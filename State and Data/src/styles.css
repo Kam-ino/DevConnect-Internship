@@ -535,7 +535,8 @@ input[aria-invalid="true"] { border-color: var(--error); border-width: 2px; }
 .chart .line { fill: none; stroke: var(--chart); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .chart .hatch-line { stroke: var(--chart); stroke-width: 0.6; }
 .chart .opening { stroke: var(--muted); stroke-width: 1; }
-.chart .start-label { fill: var(--muted); font: 600 11px var(--mono); }
+.chart .start-label { fill: var(--ink); font: 600 11px var(--mono); }
+.chart .start-marker { fill: var(--note); stroke: var(--chart); stroke-width: 2; }
 .chart .marker { fill: var(--chart); stroke: var(--note); stroke-width: 2; }
 .chart .end-label { fill: var(--ink); font: 600 12px var(--mono); }
 .chart .crosshair { stroke: var(--muted); stroke-width: 1; }

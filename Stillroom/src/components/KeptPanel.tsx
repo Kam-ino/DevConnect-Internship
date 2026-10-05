@@ -49,7 +49,7 @@ export default function KeptPanel({ sb, video, sheets, kept, frame, onGo, onRemo
               <option value="png">PNG</option>
               <option value="webp">WebP</option>
             </select>
-            <button className="button button-chalk" type="button" onClick={() => void downloadAll()} disabled={zipping}>
+            <button className="button button-quiet" type="button" onClick={() => void downloadAll()} disabled={zipping}>
               <DownloadSimple size={18} aria-hidden="true" /> {zipping ? 'Preparing…' : 'Download all'}
             </button>
           </div>
